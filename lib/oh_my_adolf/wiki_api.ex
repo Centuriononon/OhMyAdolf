@@ -5,9 +5,8 @@ defmodule OhMyAdolf.WikiAPI do
 
   @rate_per_sec 200
   @host "en.wikipedia.org"
-  @scheme "https"
 
-  def start_link(args) do
+  def start_link(args \\ %{}) do
     RequestThrottle.start_link(%{
       rate_per_sec: @rate_per_sec,
       server_name: Map.get(args, :server_name, __MODULE__)
@@ -18,8 +17,16 @@ defmodule OhMyAdolf.WikiAPI do
 
   def valid_url?(link) when is_bitstring(link) do
     case URI.parse(link) do
-      %URI{scheme: @scheme, host: @host} -> true
+      %URI{scheme: "http", host: @host} -> true
+      %URI{scheme: "https", host: @host} -> true
       _ -> false
+    end
+  end
+
+  def fetch(pid \\ __MODULE__, link) do
+    case valid_url?(link) do
+      true -> RequestThrottle.fetch(pid, link)
+      false -> {:error, :invalid_url}
     end
   end
 end
