@@ -3,6 +3,7 @@ defmodule OhMyAdolf.Throttle do
   Throttle is a GenServer which provides rate limiting for actions.
   """
   use GenServer
+  require Logger
 
   def start_link(args) do
     server_name = validated!(args, :server_name)
@@ -13,10 +14,7 @@ defmodule OhMyAdolf.Throttle do
   end
 
   def validated!(args, :server_name) do
-    case Map.get(args, :server_name, :default) do
-      :default -> __MODULE__
-      name -> name
-    end
+    Map.get(args, :server_name, __MODULE__)
   end
 
   def validated!(args, :rate_per_sec) do
@@ -31,6 +29,8 @@ defmodule OhMyAdolf.Throttle do
 
   @impl true
   def init(args) do
+    Logger.debug("Starting Throttle server with args: #{inspect(args)}")
+
     state = %{
       acts_past: 0,
       rate_per_sec: args.rate_per_sec,
