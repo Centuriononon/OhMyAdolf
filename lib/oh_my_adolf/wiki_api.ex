@@ -29,4 +29,17 @@ defmodule OhMyAdolf.WikiAPI do
       false -> {:error, :invalid_url}
     end
   end
+
+  def fetch_page(pid \\ __MODULE__, link) do
+    case fetch(pid, link) do
+      {:ok, %HTTPoison.Response{status_code: 200} = resp} ->
+        {:ok, resp}
+
+      {:ok, resp} ->
+        {:error, resp}
+
+      rest ->
+        rest
+    end
+  end
 end
