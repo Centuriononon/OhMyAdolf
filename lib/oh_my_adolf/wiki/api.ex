@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.WikiAPI do
+defmodule OhMyAdolf.Wiki.API do
   @behaviour GenServer
 
   alias OhMyAdolf.RequestThrottle
@@ -23,6 +23,10 @@ defmodule OhMyAdolf.WikiAPI do
     end
   end
 
+  def rel_path_to_url(path) do
+    URI.merge("https://#{@host}", path)
+  end
+
   def fetch(pid \\ __MODULE__, link) do
     case valid_url?(link) do
       true -> RequestThrottle.fetch(pid, link)
@@ -36,10 +40,10 @@ defmodule OhMyAdolf.WikiAPI do
         {:ok, resp}
 
       {:ok, resp} ->
-        {:error, resp}
+        {:error, "Received status code #{resp.status_code}"}
 
-      rest ->
-        rest
+      err ->
+        err
     end
   end
 end
