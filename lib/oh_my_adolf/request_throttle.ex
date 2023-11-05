@@ -2,18 +2,19 @@ defmodule OhMyAdolf.RequestThrottle do
   @moduledoc """
   RequestThrottle is a model which provides rate limit for outbound requests.
   """
+  @behaviour GenServer
   alias OhMyAdolf.Throttle
   require Logger
 
   def start_link(args) do
-    args = Map.merge(args, %{server_name: validated!(args, :server_name)})
-
-    Throttle.start_link(args)
+    Throttle.start_link(
+      Map.merge(
+        args, %{server_name: Map.get(args, :server_name, __MODULE__)}
+      )
+    )
   end
 
-  def validated!(args, :server_name) do
-    Map.get(args, :server_name, __MODULE__)
-  end
+  defdelegate init(args), to: Throttle
 
   def fetch(pid \\ __MODULE__, link, options \\ []) do
     headers = Keyword.get(options, :headers) || []
