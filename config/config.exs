@@ -21,6 +21,8 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   pubsub_server: OhMyAdolf.PubSub,
   live_view: [signing_salt: "NLHuBSjH"]
 
+config :oh_my_adolf, wiki_api: [endpoint: "https://wikipedia.org", http_client: HTTPoison]
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

@@ -7,23 +7,22 @@ defmodule OhMyAdolf.Throttle do
 
   def start_link(args) do
     server_name = validated!(args, :server_name)
-
     args = %{rate_per_sec: validated!(args, :rate_per_sec)}
 
     GenServer.start_link(__MODULE__, args, name: server_name)
   end
 
-  def validated!(args, :server_name) do
-    Map.get(args, :server_name, __MODULE__)
+  defp validated!(args, :server_name) do
+    Keyword.get(args, :server_name, __MODULE__)
   end
 
-  def validated!(args, :rate_per_sec) do
+  defp validated!(args, :rate_per_sec) do
     value = args[:rate_per_sec]
 
     if is_number(value) do
       value
     else
-      throw ArgumentError.message(":rate_per_sec arg is mandatory")
+      throw(ArgumentError.message(":rate_per_sec arg is mandatory"))
     end
   end
 
@@ -32,8 +31,8 @@ defmodule OhMyAdolf.Throttle do
     Logger.debug("Starting Throttle server with args: #{inspect(args)}")
 
     state = %{
-      acts_past: 0,
-      rate_per_sec: args.rate_per_sec,
+      count: 0,
+      rate_per_sec: args.rate_per_sec
     }
 
     schedule_ticker()
@@ -45,14 +44,10 @@ defmodule OhMyAdolf.Throttle do
 
   @impl true
   def handle_call(:ask, _from, state) do
-    %{
-      acts_past: count,
-      rate_per_sec: rate
-    } = state
+    %{count: count, rate_per_sec: rate} = state
 
     if count < rate do
-      new_state = Map.merge(state, %{acts_past: count + 1})
-      {:reply, :act, new_state}
+      {:reply, :act, Map.merge(state, %{count: count + 1})}
     else
       {:reply, :await, state}
     end
@@ -61,7 +56,7 @@ defmodule OhMyAdolf.Throttle do
   @impl true
   def handle_info(:tick, state) do
     schedule_ticker()
-    {:noreply, Map.merge(state, %{acts_past: 0})}
+    {:noreply, Map.merge(state, %{count: 0})}
   end
 
   defp schedule_ticker() do

@@ -7,13 +7,18 @@ defmodule OhMyAdolf.Application do
 
   @impl true
   def start(_type, _args) do
+    http_throttle =
+      {OhMyAdolf.Throttle,
+       [
+         server_name: OhMyAdolf.Throttle.HTTPClient,
+         rate_per_sec: 200
+       ]}
+
     children = [
+      http_throttle,
       OhMyAdolfWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:oh_my_adolf, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: OhMyAdolf.PubSub},
-      # Start a worker by calling: OhMyAdolf.Worker.start_link(arg)
-      # {OhMyAdolf.Worker, arg},
-      # Start to serve requests, typically the last entry
       OhMyAdolfWeb.Endpoint
     ]
 

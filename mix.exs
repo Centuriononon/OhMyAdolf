@@ -44,7 +44,8 @@ defmodule OhMyAdolf.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:plug_cowboy, "~> 2.5"},
       {:floki, "~> 0.35.2"},
-      {:httpoison, "~> 2.1.0"}
+      {:httpoison, "~> 2.1.0"},
+      {:libgraph, "~> 0.16.0"}
     ]
   end
 
