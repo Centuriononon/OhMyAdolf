@@ -14,14 +14,9 @@ defmodule OhMyAdolf.PoisonProxy do
     throttle = validate!(config, :throttle)
     http_client = validate!(config, :http_client)
 
-    IO.puts(throttle)
     case Throttle.ask(throttle) do
-      :act ->
-        IO.puts("act")
-        http_client.get(url, headers, options)
-      :await ->
-        IO.puts("await")
-        do_get(url, headers, options, config)
+      :act -> http_client.get(url, headers, options)
+      :await -> do_get(url, headers, options, config)
     end
   end
 
