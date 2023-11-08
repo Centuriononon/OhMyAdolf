@@ -8,7 +8,7 @@ defmodule OhMyAdolf.Wiki.Scraper do
 
   @impl true
   def uniq_urls(page, config \\ default_config()) when is_bitstring(page) do
-    api = config[:api_client]
+    api = validate!(config, :api_client)
 
     case Floki.parse_document(page) do
       {:ok, document} ->
@@ -17,8 +17,8 @@ defmodule OhMyAdolf.Wiki.Scraper do
           |> Floki.find(@content)
           |> Floki.find("a")
           |> Floki.attribute("href")
-          |> Stream.map(api.absolute_path/1)
-          |> Stream.filter(api.api_url?/1)
+          |> Stream.map(&api.absolute_path/1)
+          |> Stream.filter(&api.api_url?/1)
           |> Stream.reject(&category_url?/1)
           |> Stream.uniq()
           |> Enum.to_list()
@@ -36,14 +36,9 @@ defmodule OhMyAdolf.Wiki.Scraper do
 
   defp default_config() do
     Application.get_env(:oh_my_adolf, :wiki_api)
-    |> validate_config()
-  end
-
-  defp validate_config(config) do
-    [api_client: validate!(config, :api_client)]
   end
 
   defp validate!(config, :api_client) do
-    config[:api_client] || OhMyAdolf.Wiki.APIClient
+    Keyword.get(config, :api_client, OhMyAdolf.Wiki.APIClient)
   end
 end

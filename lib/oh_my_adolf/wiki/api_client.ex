@@ -13,7 +13,7 @@ defmodule OhMyAdolf.Wiki.APIClient do
 
   @impl true
   def absolute_path(path, config \\ default_config()) do
-    validate!(config, :endpoint) |> URI.merge(path)
+    URI.merge("https://" <> validate!(config, :host), path)
   end
 
   @impl true
