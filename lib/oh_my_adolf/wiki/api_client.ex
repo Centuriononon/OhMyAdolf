@@ -1,7 +1,7 @@
 defmodule OhMyAdolf.Wiki.APIClient do
   @behaviour OhMyAdolf.APIClient
 
-  def wiki_url?(%URI{} = url, config \\ default_config()) do
+  def api_url?(%URI{} = url, config \\ default_config()) do
     endpoint = URI.new(config[:endpoint])
     host = endpoint.host
     scheme = endpoint.scheme
@@ -21,7 +21,7 @@ defmodule OhMyAdolf.Wiki.APIClient do
   def fetch(url, config \\ default_config()) do
     http_client = Keyword.get(config, :http_client)
 
-    case wiki_url?(url) do
+    case api_url?(url) do
       true -> http_client.get(url)
       false -> {:error, :incorrect_url}
     end

@@ -1,5 +1,8 @@
 import Config
 
+config :oh_my_adolf,
+  wiki_api: [endpoint: "https://wikipedia.org", http_client: OhMyAdolf.Throttle.HTTPClient]
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

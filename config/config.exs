@@ -21,7 +21,20 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   pubsub_server: OhMyAdolf.PubSub,
   live_view: [signing_salt: "NLHuBSjH"]
 
-config :oh_my_adolf, wiki_api: [endpoint: "https://wikipedia.org", http_client: HTTPoison]
+config :oh_my_adolf,
+  wiki_api: [
+    endpoint: "https://wikipedia.org",
+    http_client: OhMyAdolf.PoisonProxy,
+    api_client: OhMyAdolf.Wiki.APIClient
+  ]
+
+config :oh_my_adolf,
+  poison_proxy: [
+    timeout: 10_000,
+    rate_per_sec: 2,
+    http_client: HTTPoison,
+    throttle: OhMyAdolf.PoisonProxy
+  ]
 
 # Configure esbuild (the version is required)
 config :esbuild,

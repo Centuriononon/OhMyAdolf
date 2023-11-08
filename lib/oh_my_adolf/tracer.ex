@@ -1,18 +1,19 @@
 defmodule OhMyAdolf.Tracer do
+  require Logger
   alias OhMyAdolf.Wiki.{APIClient, Scraper}
   alias OhMyAdolf.Crawler
 
   def trace(%URI{} = head_url, %URI{} = tail_url, config \\ default_config()) do
     Logger.info("Tracing: #{head_url}, to: #{tail_url}")
 
-    Crawler.crawl(head_url, config)
+    Crawler.crawl_urls(head_url, config)
     |> find_url_leading_to_tail(tail_url)
     |> case do
       :error ->
         {:error, :stub}
 
       {curr_url, graph} ->
-        path = Graph.find_shortest_path(graph, head_url, curr_url)
+        path = Graph.get_shortest_path(graph, head_url, curr_url)
         :ok = register_path(path)
 
         path

@@ -8,6 +8,9 @@ defmodule OhMyAdolf.APIClient do
   @callback absolute_path(String.t()) :: URI.t()
   @callback absolute_path(String.t(), config()) :: URI.t()
 
+  @callback api_url?(URI.t()) :: boolean()
+  @callback api_url?(URI.t(), config()) :: boolean()
+
   @callback fetch(URL.t()) ::
               get_request()
               | {:error, :not_wiki_url}

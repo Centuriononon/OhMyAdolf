@@ -10,7 +10,7 @@ defmodule OhMyAdolf.Application do
     http_throttle =
       {OhMyAdolf.Throttle,
        [
-         server_name: OhMyAdolf.Throttle.HTTPClient,
+         server_name: OhMyAdolf.PoisonProxy,
          rate_per_sec: 200
        ]}
 

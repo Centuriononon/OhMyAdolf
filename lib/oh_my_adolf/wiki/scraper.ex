@@ -2,13 +2,14 @@ defmodule OhMyAdolf.Wiki.Scraper do
   @moduledoc """
   Parses and scrapes wiki pages.
   """
-  require Logger
 
   @behaviour OhMyAdolf.Scraper
   @content "div#bodyContent"
 
   @impl true
-  def uniq_urls(page) when is_bitstring(page) do
+  def uniq_urls(page, config \\ default_config()) when is_bitstring(page) do
+    api = config[:api_client]
+
     case Floki.parse_document(page) do
       {:ok, document} ->
         urls =
@@ -16,8 +17,8 @@ defmodule OhMyAdolf.Wiki.Scraper do
           |> Floki.find(@content)
           |> Floki.find("a")
           |> Floki.attribute("href")
-          |> Stream.map(&API.relative_path_to_url/1)
-          |> Stream.filter(&API.wiki_url?/1)
+          |> Stream.map(api.absolute_path/1)
+          |> Stream.filter(api.api_url?/1)
           |> Stream.reject(&category_url?/1)
           |> Stream.uniq()
           |> Enum.to_list()
@@ -25,11 +26,24 @@ defmodule OhMyAdolf.Wiki.Scraper do
         {:ok, urls}
 
       _ ->
-        {:bad_parse}
+        {:error, :bad_parse}
     end
   end
 
   defp category_url?(url) do
     URI.to_string(url) =~ ~r/\/wiki\/Category:/
+  end
+
+  defp default_config() do
+    Application.get_env(:oh_my_adolf, :wiki_api)
+    |> validate_config()
+  end
+
+  defp validate_config(config) do
+    [api_client: validate!(config, :api_client)]
+  end
+
+  defp validate!(config, :api_client) do
+    config[:api_client] || OhMyAdolf.Wiki.APIClient
   end
 end
