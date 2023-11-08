@@ -1,25 +1,24 @@
 defmodule OhMyAdolf.Wiki.APIClient do
   @behaviour OhMyAdolf.APIClient
 
+  @impl true
   def api_url?(%URI{} = url, config \\ default_config()) do
-    endpoint = URI.new(config[:endpoint])
-    host = endpoint.host
-    scheme = endpoint.scheme
+    host = validate!(config, :host)
 
     case url do
-      %{host: ^host, scheme: ^scheme} -> true
+      %{host: ^host} -> true
       _ -> false
     end
   end
 
   @impl true
   def absolute_path(path, config \\ default_config()) do
-    URI.merge(config[:endpoint], path)
+    validate!(config, :endpoint) |> URI.merge(path)
   end
 
   @impl true
   def fetch(url, config \\ default_config()) do
-    http_client = Keyword.get(config, :http_client)
+    http_client = validate!(config, :http_client)
 
     case api_url?(url) do
       true -> http_client.get(url)
@@ -40,5 +39,13 @@ defmodule OhMyAdolf.Wiki.APIClient do
 
   defp default_config() do
     Application.get_env(:oh_my_adolf, :wiki_api)
+  end
+
+  defp validate!(config, :host) do
+    Keyword.get(config, :host, "en.wikipedia.org")
+  end
+
+  defp validate!(config, :http_client) do
+    Keyword.get(config, :http_client, HTTPoison)
   end
 end

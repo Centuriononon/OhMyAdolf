@@ -23,7 +23,7 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
 
 config :oh_my_adolf,
   wiki_api: [
-    endpoint: "https://wikipedia.org",
+    host: "en.wikipedia.org",
     http_client: OhMyAdolf.PoisonProxy,
     api_client: OhMyAdolf.Wiki.APIClient
   ]
