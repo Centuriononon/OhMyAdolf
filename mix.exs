@@ -45,7 +45,8 @@ defmodule OhMyAdolf.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:floki, "~> 0.35.2"},
       {:httpoison, "~> 2.1.0"},
-      {:libgraph, "~> 0.16.0"}
+      {:libgraph, "~> 0.16.0"},
+      {:qex, "~> 0.5.1"}
     ]
   end
 

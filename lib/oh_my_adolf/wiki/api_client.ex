@@ -47,7 +47,7 @@ defmodule OhMyAdolf.Wiki.APIClient do
   end
 
   defp default_config() do
-    Application.get_env(:oh_my_adolf, :wiki_api)
+    Application.get_env(:oh_my_adolf, :wiki_api, [])
   end
 
   defp validate!(config, :host) do
