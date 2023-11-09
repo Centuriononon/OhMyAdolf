@@ -20,6 +20,7 @@ defmodule OhMyAdolf.Wiki.Scraper do
           |> Stream.map(&api.absolute_path/1)
           |> Stream.filter(&api.api_url?/1)
           |> Stream.reject(&category_url?/1)
+          |> Stream.reject(&template_url?/1)
           |> Stream.uniq()
           |> Enum.to_list()
 
@@ -28,6 +29,10 @@ defmodule OhMyAdolf.Wiki.Scraper do
       _ ->
         {:error, :bad_parse}
     end
+  end
+
+  defp template_url?(url) do
+    URI.to_string(url) =~ ~r/\/wiki\/Template:/
   end
 
   defp category_url?(url) do
