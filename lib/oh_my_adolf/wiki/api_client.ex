@@ -19,9 +19,12 @@ defmodule OhMyAdolf.Wiki.APIClient do
   @impl true
   def fetch(url, config \\ default_config()) do
     http_client = validate!(config, :http_client)
+    headers = validate!(config, :headers)
+    options = validate!(config, :options)
+
 
     case api_url?(url) do
-      true -> http_client.get(url)
+      true -> http_client.get(url, headers, options)
       false -> {:error, :incorrect_url}
     end
   end
@@ -32,8 +35,14 @@ defmodule OhMyAdolf.Wiki.APIClient do
       {:ok, %HTTPoison.Response{status_code: 200} = resp} ->
         {:ok, resp.body}
 
-      rest ->
-        rest
+      {:ok, %HTTPoison.Response{status_code: status}} ->
+        {:error, "Received response with #{status} status"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+
+      err ->
+        err
     end
   end
 
@@ -47,5 +56,13 @@ defmodule OhMyAdolf.Wiki.APIClient do
 
   defp validate!(config, :http_client) do
     Keyword.get(config, :http_client, HTTPoison)
+  end
+
+  defp validate!(config, :headers) do
+    Keyword.get(config, :headers, [{"User-Agent", "OhMyAdolfTracer"}])
+  end
+
+  defp validate!(config, :options) do
+    Keyword.get(config, :options, [follow_redirect: true])
   end
 end
