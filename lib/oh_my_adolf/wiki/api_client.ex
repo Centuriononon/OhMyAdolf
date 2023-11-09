@@ -36,7 +36,7 @@ defmodule OhMyAdolf.Wiki.APIClient do
         {:ok, resp.body}
 
       {:ok, %HTTPoison.Response{status_code: status}} ->
-        {:error, "Received response with #{status} status"}
+        {:error, "received response with #{status} status"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
