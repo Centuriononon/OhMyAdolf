@@ -12,47 +12,51 @@ defmodule OhMyAdolf.Crawler do
   def get_init_handler(url, config) do
     fn ->
       Logger.info("Started crawling #{url}.")
-      [scrape_lazy_re(url, config)]
+      Qex.new([scrape_lazy_re(url, config)])
     end
   end
 
-  def handle_next([scraper | scrapers]) do
-    case scraper.() do
-      {:ok, {fst_url, sub_scraper}} ->
-        {[{:ok, fst_url}], scrapers ++ sub_scraper}
+  def handle_next(scrapers_q) do
+    case Qex.pop(scrapers_q) do
+      {{:value, scraper}, next_scrapers_q} ->
+        case scraper.() do
+          {:ok, {fst_url, sub_scrapers_q}} ->
+            {[{:ok, fst_url}], Qex.join(next_scrapers_q, sub_scrapers_q)}
 
-      {:ok, {abv_url, cur_url, sub_scraper}} ->
-        {[{:ok, abv_url, cur_url}], scrapers ++ sub_scraper}
+          {:ok, {abv_url, cur_url, sub_scrapers_q}} ->
+            {[{:ok, abv_url, cur_url}], Qex.join(next_scrapers_q, sub_scrapers_q)}
 
-      {:error, {url, err}} ->
-        {[{:error, {url, err}}], scrapers}
+          {:error, {url, err}} ->
+            {[{:error, {url, err}}], scrapers_q}
+        end
+
+      {:empty, _scrapers_q} ->
+        {:halt, []}
     end
-  end
-
-  def handle_next([]) do
-    {:halt, []}
   end
 
   def get_finish_handler(url) do
     fn _acc -> Logger.info("Finished crawling #{url}.") end
   end
 
-  def scrape_many_lazy_re(urls, abv_url, config) do
-    Enum.map(urls, fn url ->
+  def scrape_many_lazy_re(%Qex{} = urls_q, %URI{} = abv_url, config) do
+    urls_q
+    |> Enum.map(fn url ->
       fn ->
-        with {:ok, {sub_url, sub_scrapers}} <- scrape_lazy_re(url, config).() do
-          {:ok, {abv_url, sub_url, sub_scrapers}}
+        with {:ok, {sub_url, sub_scrapers_q}} <- scrape_lazy_re(url, config).() do
+          {:ok, {abv_url, sub_url, sub_scrapers_q}}
         end
       end
     end)
+    |> Qex.new()
   end
 
   def scrape_lazy_re(url, config) do
     fn ->
-      with {:ok, sub_urls} <- scrape(url, config) do
-        sub_scrapers = scrape_many_lazy_re(sub_urls, url, config)
+      with {:ok, sub_urls_q} <- scrape(url, config) do
+        sub_scrapers_q = scrape_many_lazy_re(sub_urls_q, url, config)
 
-        {:ok, {url, sub_scrapers}}
+        {:ok, {url, sub_scrapers_q}}
       else
         err ->
           {:error, {url, err}}
@@ -65,7 +69,7 @@ defmodule OhMyAdolf.Crawler do
       {:ok, page} <- config.api_client.fetch_page(url),
       {:ok, sub_urls} <- config.scraper.uniq_urls(page)
     ) do
-      {:ok, sub_urls}
+      {:ok, Qex.new(sub_urls)}
     end
   end
 end
