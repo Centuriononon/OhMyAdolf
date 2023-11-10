@@ -9,7 +9,7 @@ defmodule OhMyAdolf do
   require Logger
   alias __MODULE__
 
-  # Long: "https://en.wikipedia.org/wiki/Schutzstaffel" |> URI.parse |> OhMyAdolf.find_path()
+  # Long: "https://en.wikipedia.org/wiki/Minecraft_(franchise)" |> URI.parse |> OhMyAdolf.find_path(seeking_url: "https://en.wikipedia.org/wiki/Adolf_Hitler")
   # Short: "https://en.wikipedia.org/wiki/Nazism" |> URI.parse |> OhMyAdolf.find_path()
   def find_path(%URI{} = url, config \\ default_config()) do
     seeking_url = validate!(config, :seeking_url) |> URI.parse()

@@ -11,7 +11,7 @@ defmodule OhMyAdolf.CrawlerHelpers do
         |> Stream.map(fn sub_url -> {url, sub_url} end)
         |> Enum.to_list()
       end,
-      max_concurency: config.max_concurency,
+      max_concurency: config.chunks,
       on_timeout: :kill_task,
       timeout: 20_000
     )
@@ -45,7 +45,7 @@ defmodule OhMyAdolf.CrawlerHelpers do
 
   def validate_config!(config) do
     %{
-      max_concurency: config[:max_concurency] || 50,
+      max_concurency: config[:chunks] || 50,
       api_client: validate_as_req!(config, :api_client),
       scraper: validate_as_req!(config, :scraper)
     }

@@ -26,7 +26,7 @@ config :oh_my_adolf,
     seeking_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
     api_client: OhMyAdolf.Wiki.APIClient,
     scraper: OhMyAdolf.Wiki.Scraper,
-    max_concurency: 200
+    chunks: 200
   ],
   wiki_api: [
     host: "en.wikipedia.org",
