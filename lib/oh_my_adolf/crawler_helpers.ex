@@ -51,6 +51,7 @@ defmodule OhMyAdolf.CrawlerHelpers do
   end
 
   def validate_as_req!(config, key) do
-    config[key] || raise ArgumentError.exception("#{inspect(key)} arg is required")
+    config[key] ||
+      raise ArgumentError.exception("#{inspect(key)} arg is required")
   end
 end

@@ -19,7 +19,7 @@ defmodule OhMyAdolf.MixProject do
   def application do
     [
       mod: {OhMyAdolf.Application, []},
-      extra_applications: [:logger, :runtime_tools, :wx, :observer]
+      extra_applications: [:logger]
     ]
   end
 
@@ -46,7 +46,7 @@ defmodule OhMyAdolf.MixProject do
       {:floki, "~> 0.35.2"},
       {:httpoison, "~> 2.1.0"},
       {:libgraph, "~> 0.16.0"},
-      {:qex, "~> 0.5.1"}
+      {:bolt_sips, "~> 2.0"}
     ]
   end
 
@@ -59,9 +59,16 @@ defmodule OhMyAdolf.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "assets.setup", "assets.build"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing"
+      ],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": [
+        "tailwind default --minify",
+        "esbuild default --minify",
+        "phx.digest"
+      ]
     ]
   end
 end

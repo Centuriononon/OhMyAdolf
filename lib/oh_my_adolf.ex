@@ -71,7 +71,8 @@ defmodule OhMyAdolf do
   end
 
   defp validate!(config, :seeking_url) do
-    Keyword.get(config, :seeking_url) || "https://en.wikipedia.org/wiki/Adolf_Hitler"
+    Keyword.get(config, :seeking_url) ||
+      "https://en.wikipedia.org/wiki/Adolf_Hitler"
   end
 
   defp validate!(config, :api_client) do

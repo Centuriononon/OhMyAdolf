@@ -15,7 +15,7 @@ defmodule OhMyAdolfWeb.Router do
   end
 
   scope "/", OhMyAdolfWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
     get "/", PageController, :home
   end

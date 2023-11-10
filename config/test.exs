@@ -4,7 +4,8 @@ import Config
 # you can enable the server option below.
 config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "CI1SuK2CPETxv/9R/jyd8aJXGyCnqtswMxsaWjRWt2+l2tFjgywFcx4zD5sUufs/",
+  secret_key_base:
+    "CI1SuK2CPETxv/9R/jyd8aJXGyCnqtswMxsaWjRWt2+l2tFjgywFcx4zD5sUufs/",
   server: false
 
 # Print only warnings and errors during test

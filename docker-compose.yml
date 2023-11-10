@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  server:
+    container_name: oh_my_adolf
+    build: 
+      context: .
+      args:
+        HTTP_PORT: ${HTTP_PORT} 
+    env_file: .env
+    network_mode: host
+    command: start
+    # depends_on:
+    #   neo4j:
+    #     condition: service_started
+  neo4j:
+    container_name: oh_my_adolf_neo4j
+    image: neo4j:4.4.3-community
+    ports:
+      - 7474:7474
+      - 7687:7687
+    restart: unless-stopped
+    environment:
+      - NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
+    volumes:
+      - ./db/data:/data
+      - ./db/conf:/conf
+      - ./db/logs:/logs

@@ -18,7 +18,8 @@ defmodule OhMyAdolf.Application do
       http_throttle,
       {Task.Supervisor, name: OhMyAdolf.TaskSupervisor},
       OhMyAdolfWeb.Telemetry,
-      {DNSCluster, query: Application.get_env(:oh_my_adolf, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:oh_my_adolf, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: OhMyAdolf.PubSub},
       OhMyAdolfWeb.Endpoint
     ]

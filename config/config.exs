@@ -39,6 +39,13 @@ config :oh_my_adolf,
     throttle: OhMyAdolf.PoisonProxy
   ]
 
+config :bolt_sips, Bolt,
+  url: "bolt://localhost:7687",
+  basic_auth: [
+    username: System.get_env("NEO4J_USERNAME", "neo4j"),
+    password: System.get_env("NEO4J_PASSWORD", "pass")
+  ]
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
