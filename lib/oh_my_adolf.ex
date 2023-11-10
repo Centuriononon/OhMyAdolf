@@ -16,7 +16,6 @@ defmodule OhMyAdolf do
     config = %{
       api_client: validate!(config, :api_client),
       scraper: validate!(config, :scraper),
-      max_concurency: validate!(config, :max_concurency)
     }
 
     OhMyAdolf.Crawler.crawl(url, config)
