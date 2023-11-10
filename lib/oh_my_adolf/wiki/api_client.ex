@@ -62,6 +62,6 @@ defmodule OhMyAdolf.Wiki.APIClient do
   end
 
   defp validate!(config, :options) do
-    Keyword.get(config, :options, [follow_redirect: true])
+    Keyword.get(config, :options, follow_redirect: true, timeout: 30_000)
   end
 end

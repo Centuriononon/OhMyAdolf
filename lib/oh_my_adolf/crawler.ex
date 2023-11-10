@@ -19,7 +19,8 @@ defmodule OhMyAdolf.Crawler do
       nexts =
         url
         |> scraped_url(config)
-        |> Enum.map(&{url, &1})
+        |> Stream.map(&{url, &1})
+        |> Enum.to_list()
 
       {nexts, [], [], config}
     end
