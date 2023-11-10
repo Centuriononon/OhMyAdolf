@@ -19,7 +19,7 @@ defmodule OhMyAdolf.MixProject do
   def application do
     [
       mod: {OhMyAdolf.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :wx, :observer]
     ]
   end
 

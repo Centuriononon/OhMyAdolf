@@ -22,12 +22,12 @@ defmodule OhMyAdolf.Wiki.Scraper do
           |> Stream.reject(&category_url?/1)
           |> Stream.reject(&template_url?/1)
           |> Stream.uniq()
-          |> Enum.to_list()
+          |> Enum.to_list
 
         {:ok, urls}
 
       _ ->
-        {:error, :bad_parse}
+        {:error, "bad document parse"}
     end
   end
 

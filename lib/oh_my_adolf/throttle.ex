@@ -40,7 +40,9 @@ defmodule OhMyAdolf.Throttle do
     {:ok, state}
   end
 
-  def ask(pid \\ __MODULE__), do: GenServer.call(pid, :ask)
+  def ask(pid \\ __MODULE__, timeout \\ 5_000) do
+    GenServer.call(pid, :ask, timeout)
+  end
 
   @impl true
   def handle_call(:ask, _from, state) do

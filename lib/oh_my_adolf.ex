@@ -9,6 +9,8 @@ defmodule OhMyAdolf do
   require Logger
   alias __MODULE__
 
+  # Long: "https://en.wikipedia.org/wiki/Schutzstaffel" |> URI.parse |> OhMyAdolf.find_path()
+  # Short: "https://en.wikipedia.org/wiki/Nazism" |> URI.parse |> OhMyAdolf.find_path()
   def find_path(%URI{} = url, config \\ default_config()) do
     seeking_url = validate!(config, :seeking_url) |> URI.parse()
     config = %{
@@ -31,11 +33,11 @@ defmodule OhMyAdolf do
         true
 
       {:ok, fst_url} ->
-        Logger.notice("Skipping the first url: #{fst_url}")
+        Logger.info("Skipping the first url: #{fst_url}")
         false
 
       {:ok, abv_url, url} ->
-        Logger.notice("Skipping #{url} --from--> #{abv_url}")
+        Logger.info("Skipping #{url} --from--> #{abv_url}")
         false
 
       {:error, {url, {:error, reason}}} ->

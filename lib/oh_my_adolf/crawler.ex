@@ -12,55 +12,59 @@ defmodule OhMyAdolf.Crawler do
   def get_init_handler(url, config) do
     fn ->
       Logger.info("Started crawling #{url}.")
-      Qex.new([scrape_lazy_re(url, config)])
+
+      currs =
+        url
+        |> scraped_url(config)
+        |> Enum.map(&{url, &1})
+
+      {currs, [], config}
     end
   end
 
-  def handle_next(scrapers_q) do
-    case Qex.pop(scrapers_q) do
-      {{:value, scraper}, next_scrapers_q} ->
-        case scraper.() do
-          {:ok, {fst_url, sub_scrapers_q}} ->
-            {[{:ok, fst_url}], Qex.join(next_scrapers_q, sub_scrapers_q)}
+  def handle_next({[], [], _config}) do
+    {:halt, []}
+  end
 
-          {:ok, {abv_url, cur_url, sub_scrapers_q}} ->
-            {[{:ok, abv_url, cur_url}], Qex.join(next_scrapers_q, sub_scrapers_q)}
+  def handle_next({[], prevs, config}) do
+    currs =
+      prevs
+      |> Stream.map(fn {_abv_url, url} -> url end)
+      |> scraped_urls(config)
 
-          {:error, {url, err}} ->
-            {[{:error, {url, err}}], scrapers_q}
-        end
+    handle_next({currs, []})
+  end
 
-      {:empty, _scrapers_q} ->
-        {:halt, []}
-    end
+  def handle_next({[{abv_url, url} = curr | currs], prevs, config}) do
+    {[{:ok, abv_url, url}], {currs, [curr] ++ prevs, config}}
   end
 
   def get_finish_handler(url) do
     fn _acc -> Logger.info("Finished crawling #{url}.") end
   end
 
-  def scrape_many_lazy_re(%Qex{} = urls_q, %URI{} = abv_url, config) do
-    urls_q
-    |> Enum.map(fn url ->
-      fn ->
-        with {:ok, {sub_url, sub_scrapers_q}} <- scrape_lazy_re(url, config).() do
-          {:ok, {abv_url, sub_url, sub_scrapers_q}}
-        end
-      end
-    end)
-    |> Qex.new()
+  def scraped_urls(urls, config) do
+    Task.Supervisor.async_stream(
+      OhMyAdolf.TaskSupervisor,
+      urls,
+      fn url ->
+        url
+        |> scraped_url(config)
+        |> Enum.map(fn sub_url -> {url, sub_url} end)
+      end,
+      # max concurency is the rate of the proxy actually
+      max_concurency: 200,
+      on_timeout: :kill_task,
+      timeout: 20_000
+    )
+    |> Stream.flat_map(& &1)
+    |> Enum.to_list()
   end
 
-  def scrape_lazy_re(url, config) do
-    fn ->
-      with {:ok, sub_urls_q} <- scrape(url, config) do
-        sub_scrapers_q = scrape_many_lazy_re(sub_urls_q, url, config)
-
-        {:ok, {url, sub_scrapers_q}}
-      else
-        err ->
-          {:error, {url, err}}
-      end
+  def scraped_url(url, config) do
+    case scrape(url, config) do
+      {:ok, sub_urls} -> sub_urls
+      _ -> []
     end
   end
 
@@ -69,7 +73,10 @@ defmodule OhMyAdolf.Crawler do
       {:ok, page} <- config.api_client.fetch_page(url),
       {:ok, sub_urls} <- config.scraper.uniq_urls(page)
     ) do
-      {:ok, Qex.new(sub_urls)}
+      {:ok, sub_urls}
+    else
+      err ->
+        {:error, {url, err}}
     end
   end
 end

@@ -11,10 +11,11 @@ defmodule OhMyAdolf.PoisonProxy do
   end
 
   defp do_get(url, headers, options, config) do
+    timeout = validate!(config, :timeout)
     throttle = validate!(config, :throttle)
     http_client = validate!(config, :http_client)
 
-    case Throttle.ask(throttle) do
+    case Throttle.ask(throttle, timeout) do
       :act -> http_client.get(url, headers, options)
       :await -> do_get(url, headers, options, config)
     end

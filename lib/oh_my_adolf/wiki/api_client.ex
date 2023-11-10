@@ -17,20 +17,19 @@ defmodule OhMyAdolf.Wiki.APIClient do
   end
 
   @impl true
-  def fetch(url, config \\ default_config()) do
+  def fetch(%URI{} = url, config \\ default_config()) do
     http_client = validate!(config, :http_client)
     headers = validate!(config, :headers)
     options = validate!(config, :options)
 
-
     case api_url?(url) do
       true -> http_client.get(url, headers, options)
-      false -> {:error, :incorrect_url}
+      false -> {:error, "got external url: #{url}"}
     end
   end
 
   @impl true
-  def fetch_page(url, config \\ default_config()) do
+  def fetch_page(%URI{} = url, config \\ default_config()) do
     case fetch(url, config) do
       {:ok, %HTTPoison.Response{status_code: 200} = resp} ->
         {:ok, resp.body}
@@ -39,9 +38,9 @@ defmodule OhMyAdolf.Wiki.APIClient do
         {:error, "received response with #{status} status"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, reason}
+        {:error, "httpoison error: " <> to_string(reason)}
 
-      err ->
+      {:error, _reason} = err ->
         err
     end
   end
