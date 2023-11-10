@@ -19,7 +19,8 @@ defmodule OhMyAdolf.Crawler do
       currs =
         url
         |> scraped_url(config)
-        |> Enum.map(&{url, &1})
+        |> Stream.map(&{url, &1})
+        |> Enum.to_list()
 
       {currs, [], config}
     end
@@ -34,6 +35,7 @@ defmodule OhMyAdolf.Crawler do
       prevs
       |> Stream.map(fn {_abv_url, url} -> url end)
       |> scraped_urls(config)
+      |> Enum.to_list()
 
     handle_next({currs, [], config})
   end

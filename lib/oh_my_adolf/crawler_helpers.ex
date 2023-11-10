@@ -19,7 +19,6 @@ defmodule OhMyAdolf.CrawlerHelpers do
       {:ok, urls} -> urls
       _ -> []
     end)
-    |> Enum.to_list()
   end
 
   def scraped_url(url, config) do

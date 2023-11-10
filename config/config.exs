@@ -33,7 +33,7 @@ config :oh_my_adolf,
     http_client: OhMyAdolf.PoisonProxy
   ],
   poison_proxy: [
-    timeout: 10_000,
+    timeout: :infinity,
     rate_per_sec: 200,
     http_client: HTTPoison,
     throttle: OhMyAdolf.PoisonProxy
