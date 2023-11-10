@@ -5,4 +5,4 @@ up:
 down:
 	- docker-compose down
 neo4j:
-	- docker-compose up -d neo4j
+	- docker-compose up neo4j
