@@ -31,14 +31,14 @@ defmodule OhMyAdolf.Wiki.APIClient do
   @impl true
   def fetch_page(%URI{} = url, config \\ default_config()) do
     case fetch(url, config) do
-      {:ok, %HTTPoison.Response{status_code: 200} = resp} ->
-        {:ok, resp.body}
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, body}
 
-      {:ok, %HTTPoison.Response{status_code: status}} ->
-        {:error, "received response with #{status} status"}
+      {:ok, %HTTPoison.Response{status_code: s}} ->
+        {:error, "received response with #{s} status"}
 
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "httpoison error: " <> to_string(reason)}
+      {:error, %HTTPoison.Error{reason: r}} ->
+        {:error, "httpoison error: " <> to_string(r)}
 
       {:error, _reason} = err ->
         err

@@ -19,24 +19,13 @@ defmodule OhMyAdolf.Wiki.Scraper do
           |> Floki.attribute("href")
           |> Stream.map(&api.absolute_path/1)
           |> Stream.filter(&api.api_url?/1)
-          |> Stream.reject(&category_url?/1)
-          |> Stream.reject(&template_url?/1)
           |> Stream.uniq()
-          |> Enum.to_list
 
         {:ok, urls}
 
       _ ->
-        {:error, "bad document parse"}
+        {:error, :bad_parse}
     end
-  end
-
-  defp template_url?(url) do
-    URI.to_string(url) =~ ~r/\/wiki\/Template:/
-  end
-
-  defp category_url?(url) do
-    URI.to_string(url) =~ ~r/\/wiki\/Category:/
   end
 
   defp default_config() do

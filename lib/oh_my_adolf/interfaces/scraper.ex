@@ -4,6 +4,6 @@ defmodule OhMyAdolf.Scraper do
   """
 
   @callback uniq_urls(String.t()) ::
-              {:ok, list(URI.t())}
-              | {:error, :bad_parse}
+              {:ok, Enum.t(URI.t())}
+              | {:error, String.t()}
 end

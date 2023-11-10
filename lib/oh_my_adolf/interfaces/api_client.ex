@@ -13,17 +13,15 @@ defmodule OhMyAdolf.APIClient do
 
   @callback fetch(URL.t()) ::
               get_request()
-              | {:error, :not_wiki_url}
+              | {:error, String.t()}
   @callback fetch(URL.t(), config()) ::
               get_request()
-              | {:error, :not_wiki_url}
+              | {:error, String.t()}
 
   @callback fetch_page(URL.t()) ::
               {:ok, String.t()}
-              | {:error, HTTPoison.Error.t()}
-              | {:error, :not_wiki_url}
+              | {:error, String.t()}
   @callback fetch_page(URL.t(), config()) ::
               {:ok, String.t()}
-              | {:error, HTTPoison.Error.t()}
-              | {:error, :not_wiki_url}
+              | {:error, String.t()}
 end

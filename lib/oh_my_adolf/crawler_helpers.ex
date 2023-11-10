@@ -6,7 +6,8 @@ defmodule OhMyAdolf.CrawlerHelpers do
       fn url ->
         url
         |> scraped_url(config)
-        |> Enum.map(fn sub_url -> {url, sub_url} end)
+        |> Stream.map(fn sub_url -> {url, sub_url} end)
+        |> Enum.to_list()
       end,
       # max concurency is the rate of the proxy actually
       max_concurency: config.max_concurency,
@@ -19,7 +20,7 @@ defmodule OhMyAdolf.CrawlerHelpers do
 
   def scraped_url(url, config) do
     case scrape(url, config) do
-      {:ok, sub_urls} -> sub_urls
+      {:ok, sub_urls_s} -> sub_urls_s
       _ -> []
     end
   end
@@ -27,9 +28,9 @@ defmodule OhMyAdolf.CrawlerHelpers do
   def scrape(url, config) do
     with(
       {:ok, page} <- config.api_client.fetch_page(url),
-      {:ok, sub_urls} <- config.scraper.uniq_urls(page)
+      {:ok, sub_urls_s} <- config.scraper.uniq_urls(page)
     ) do
-      {:ok, sub_urls}
+      {:ok, sub_urls_s}
     else
       err ->
         {:error, {url, err}}

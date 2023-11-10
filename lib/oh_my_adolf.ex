@@ -24,17 +24,9 @@ defmodule OhMyAdolf do
 
   defp get_url_handler(seeking_url) do
     fn
-      {:ok, ^seeking_url} ->
-        Logger.info("Found the seeking url")
-        true
-
       {:ok, abv_url, ^seeking_url} ->
         Logger.info("Found the seeking url from #{abv_url}")
         true
-
-      {:ok, fst_url} ->
-        Logger.info("Skipping the first url: #{fst_url}")
-        false
 
       {:ok, abv_url, url} ->
         Logger.info("Skipping #{url} --from--> #{abv_url}")
