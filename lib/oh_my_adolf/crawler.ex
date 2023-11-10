@@ -31,18 +31,18 @@ defmodule OhMyAdolf.Crawler do
   end
 
   defp handle_next({[], prevs, [], config}) do
-    chunks = Enum.chunk_every(prevs, 200)
+    chunks = Enum.chunk_every(prevs, config.chunks)
     handle_next({[], [], chunks, config})
   end
 
-  defp handle_next({[], [], [chunk | chunks], config}) do
+  defp handle_next({[], prevs, [chunk | chunks], config}) do
     nexts =
       chunk
       |> Stream.map(fn {_abv_url, url} -> url end)
       |> scraped_urls(config)
       |> Enum.to_list()
 
-    handle_next({nexts, [], chunks, config})
+    handle_next({nexts, prevs, chunks, config})
   end
 
   defp handle_next({[curr | nexts], prevs, chunks, config}) do

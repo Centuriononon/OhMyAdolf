@@ -16,7 +16,7 @@ defmodule OhMyAdolf do
     config = %{
       api_client: validate!(config, :api_client),
       scraper: validate!(config, :scraper),
-      max_concurency: validate!(config, :max_concurency)
+      chunks: validate!(config, :chunks)
     }
 
     case url do
@@ -82,7 +82,7 @@ defmodule OhMyAdolf do
     Keyword.get(config, :scraper) || OhMyAdolf.Wiki.Scraper
   end
 
-  defp validate!(config, :max_concurency) do
-    Keyword.get(config, :max_concurency) || 200
+  defp validate!(config, :chunks) do
+    Keyword.get(config, :chunks) || 200
   end
 end

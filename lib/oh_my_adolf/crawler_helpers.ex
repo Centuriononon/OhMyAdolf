@@ -44,7 +44,7 @@ defmodule OhMyAdolf.CrawlerHelpers do
 
   def validate_config!(config) do
     %{
-      max_concurency: config[:chunks] || 50,
+      chunks: config[:chunks] || 50,
       api_client: validate_as_req!(config, :api_client),
       scraper: validate_as_req!(config, :scraper)
     }
