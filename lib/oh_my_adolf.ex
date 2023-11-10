@@ -18,8 +18,14 @@ defmodule OhMyAdolf do
       scraper: validate!(config, :scraper),
     }
 
-    OhMyAdolf.Crawler.crawl(url, config)
-    |> Enum.find(get_url_handler(seeking_url))
+    case url do
+      ^seeking_url ->
+        {:ok, [url]}
+
+      _ ->
+        OhMyAdolf.Crawler.crawl(url, config)
+        |> Enum.find(get_url_handler(seeking_url))
+    end
   end
 
   defp get_url_handler(seeking_url) do
@@ -36,23 +42,23 @@ defmodule OhMyAdolf do
     end
   end
 
-  def default_config do
+  defp default_config do
     Application.get_env(:oh_my_adolf, :crawling, [])
   end
 
-  def validate!(config, :seeking_url) do
+  defp validate!(config, :seeking_url) do
     Keyword.get(config, :seeking_url) || "https://en.wikipedia.org/wiki/Adolf_Hitler"
   end
 
-  def validate!(config, :api_client) do
+  defp validate!(config, :api_client) do
     Keyword.get(config, :api_client) || Wiki.APIClient
   end
 
-  def validate!(config, :scraper) do
+  defp validate!(config, :scraper) do
     Keyword.get(config, :scraper) || Wiki.Scraper
   end
 
-  def validate!(config, :max_concurency) do
+  defp validate!(config, :max_concurency) do
     Keyword.get(config, :max_concurency) || 200
   end
 end

@@ -11,7 +11,6 @@ defmodule OhMyAdolf.CrawlerHelpers do
         |> Stream.map(fn sub_url -> {url, sub_url} end)
         |> Enum.to_list()
       end,
-      # max concurency is the rate of the proxy actually
       max_concurency: config.max_concurency,
       on_timeout: :kill_task,
       timeout: 20_000
