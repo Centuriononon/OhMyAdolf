@@ -35,7 +35,7 @@ defmodule OhMyAdolf.Crawler do
       |> Stream.map(fn {_abv_url, url} -> url end)
       |> scraped_urls(config)
 
-    handle_next({currs, []})
+    handle_next({currs, [], config})
   end
 
   defp handle_next({[{abv_url, url} = curr | currs], prevs, config}) do
