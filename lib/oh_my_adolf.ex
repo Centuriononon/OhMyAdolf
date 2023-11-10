@@ -15,7 +15,8 @@ defmodule OhMyAdolf do
     seeking_url = validate!(config, :seeking_url) |> URI.parse()
     config = %{
       api_client: validate!(config, :api_client),
-      scraper: validate!(config, :scraper)
+      scraper: validate!(config, :scraper),
+      max_concurency: validate!(config, :max_concurency)
     }
 
     OhMyAdolf.Crawler.crawl(url, config)
@@ -60,5 +61,9 @@ defmodule OhMyAdolf do
 
   def validate!(config, :scraper) do
     Keyword.get(config, :scraper) || Wiki.Scraper
+  end
+
+  def validate!(config, :max_concurency) do
+    Keyword.get(config, :max_concurency) || 200
   end
 end

@@ -25,7 +25,8 @@ config :oh_my_adolf,
   crawling: [
     seeking_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
     api_client: OhMyAdolf.Wiki.APIClient,
-    scraper: OhMyAdolf.Wiki.Scraper
+    scraper: OhMyAdolf.Wiki.Scraper,
+    max_concurency: 200
   ],
   wiki_api: [
     host: "en.wikipedia.org",
@@ -33,7 +34,7 @@ config :oh_my_adolf,
   ],
   poison_proxy: [
     timeout: 10_000,
-    rate_per_sec: 2,
+    rate_per_sec: 200,
     http_client: HTTPoison,
     throttle: OhMyAdolf.PoisonProxy
   ]

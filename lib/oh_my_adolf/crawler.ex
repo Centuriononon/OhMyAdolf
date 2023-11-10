@@ -53,7 +53,7 @@ defmodule OhMyAdolf.Crawler do
         |> Enum.map(fn sub_url -> {url, sub_url} end)
       end,
       # max concurency is the rate of the proxy actually
-      max_concurency: 200,
+      max_concurency: Map.get(config, :max_concurency, 50),
       on_timeout: :kill_task,
       timeout: 20_000
     )
