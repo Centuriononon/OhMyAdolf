@@ -23,17 +23,15 @@ defmodule OhMyAdolf do
   end
 
   defp get_url_handler(seeking_url) do
+    seeking_path = seeking_url.path
+
     fn
-      {:ok, abv_url, ^seeking_url} ->
+      {abv_url, %URI{path: ^seeking_path}} ->
         Logger.info("Found the seeking url from #{abv_url}")
         true
 
-      {:ok, abv_url, url} ->
-        Logger.info("Skipping #{url} --from--> #{abv_url}")
-        false
-
-      {:error, {url, {:error, reason}}} ->
-        Logger.error("Could not process #{url} due to #{reason}")
+      {abv_url, url} ->
+        Logger.notice("Skip: #{url} from #{abv_url}")
         false
     end
   end

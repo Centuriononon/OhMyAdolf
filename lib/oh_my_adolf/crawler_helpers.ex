@@ -1,4 +1,6 @@
 defmodule OhMyAdolf.CrawlerHelpers do
+  require Logger
+
   def scraped_urls(urls, config) do
     Task.Supervisor.async_stream(
       OhMyAdolf.TaskSupervisor,
@@ -14,7 +16,10 @@ defmodule OhMyAdolf.CrawlerHelpers do
       on_timeout: :kill_task,
       timeout: 20_000
     )
-    |> Stream.flat_map(& &1)
+    |> Stream.flat_map(fn
+      {:ok, urls} -> urls
+      _ -> []
+    end)
     |> Enum.to_list()
   end
 
@@ -30,10 +35,12 @@ defmodule OhMyAdolf.CrawlerHelpers do
       {:ok, page} <- config.api_client.fetch_page(url),
       {:ok, sub_urls_s} <- config.scraper.uniq_urls(page)
     ) do
+      Logger.debug("Scraped #{url}")
       {:ok, sub_urls_s}
     else
-      err ->
-        {:error, {url, err}}
+      {:error, reason} ->
+        Logger.warn("Could not scrape #{url} due to #{inspect(reason)}")
+        {:error, {url, reason}}
     end
   end
 

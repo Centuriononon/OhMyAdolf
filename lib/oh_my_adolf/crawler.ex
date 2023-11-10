@@ -39,10 +39,10 @@ defmodule OhMyAdolf.Crawler do
   end
 
   defp handle_next({[{abv_url, url} = curr | currs], prevs, config}) do
-    {[{:ok, abv_url, url}], {currs, [curr] ++ prevs, config}}
+    {[{abv_url, url}], {currs, [curr] ++ prevs, config}}
   end
 
   defp get_finish_handler(url) do
-    fn _acc -> Logger.info("Finished crawling #{url}.") end
+    fn _acc -> Logger.info("Finished crawling of #{url}.") end
   end
 end
