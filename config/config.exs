@@ -30,11 +30,11 @@ config :oh_my_adolf,
   ],
   wiki_api: [
     host: "en.wikipedia.org",
-    http_client: OhMyAdolf.PoisonProxy
+    http_client: OhMyAdolf.PoisonProxy,
+    rate_per_sec: 200
   ],
   poison_proxy: [
     timeout: :infinity,
-    rate_per_sec: 200,
     http_client: HTTPoison,
     throttle: OhMyAdolf.PoisonProxy
   ]

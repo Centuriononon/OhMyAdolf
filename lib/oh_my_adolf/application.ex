@@ -7,15 +7,16 @@ defmodule OhMyAdolf.Application do
 
   @impl true
   def start(_type, _args) do
-    http_throttle =
+    children = [
+      # Neo4j driver
+      {Bolt.Sips, Application.get_env(:bolt_sips, Bolt)},
+      # Throttler for rate limitting outbound traffic
       {OhMyAdolf.Throttle,
        [
          server_name: OhMyAdolf.PoisonProxy,
-         rate_per_sec: 200
-       ]}
-
-    children = [
-      http_throttle,
+         rate_per_sec: Application.get_env(:oh_my_adolf, :wiki_api)[:rate_per_sec]
+       ]},
+      # Common task supervisor
       {Task.Supervisor, name: OhMyAdolf.TaskSupervisor},
       OhMyAdolfWeb.Telemetry,
       {DNSCluster,
