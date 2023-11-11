@@ -8,7 +8,15 @@ defmodule OhMyAdolf.GraphRepo do
   # def transaction(func), do: Neo.transaction(Neo.conn(), func)
   def transaction(func), do: func.()
 
-  def get_shortest_path(%URI{} = start_url, %URI{} = end_url) do
+  def get_shortest_path(%URI{} = url, %URI{} = end_url) do
+    if to_string(url) == to_string(end_url) do
+      {:ok, [url]}
+    else
+      do_get_shortest_path(url, end_url)
+    end
+  end
+
+  defp do_get_shortest_path(%URI{} = start_url, %URI{} = end_url) do
     s_str = URI.to_string(start_url)
     e_str = URI.to_string(end_url)
     s_hash = enc(s_str)
@@ -101,7 +109,7 @@ defmodule OhMyAdolf.GraphRepo do
     url_hashes =
       path
       |> Stream.map(&URI.to_string(&1))
-      |> Enum.map(fn u -> "{url_hash: '#{u}'}" end)
+      |> Enum.map(&enc/1)
 
     Neo.conn()
     |> Neo.query("""

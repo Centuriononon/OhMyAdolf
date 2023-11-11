@@ -15,9 +15,9 @@ defmodule OhMyAdolf do
               )
   @core_url Application.compile_env(
               :oh_my_adolf,
-              :core_url,
-              "https://en.wikipedia.org/wiki/Adolf_Hitler"
-            ) |> URI.parse()
+              :core_url
+            )
+            |> URI.parse()
 
   # Short: "https://en.wikipedia.org/wiki/Nazism" |> URI.parse |> OhMyAdolf.find_path()
   # Long: "https://en.wikipedia.org/wiki/Penguin" |> URI.parse |> OhMyAdolf.find_path()

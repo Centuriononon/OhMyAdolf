@@ -10,9 +10,9 @@ services:
     env_file: .env
     network_mode: host
     command: start
-    # depends_on:
-    #   neo4j:
-    #     condition: service_started
+    depends_on:
+      neo4j:
+        condition: service_started
   neo4j:
     container_name: oh_my_adolf_neo4j
     image: neo4j:4.4.3-community
@@ -26,3 +26,4 @@ services:
       - ./db/data:/data
       - ./db/conf:/conf
       - ./db/logs:/logs
+      - ./db_init:/var/lib/neo4j/db_init/

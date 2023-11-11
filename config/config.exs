@@ -22,12 +22,7 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   live_view: [signing_salt: "NLHuBSjH"]
 
 config :oh_my_adolf,
-  scout: OhMyAdolf.Scout,
-  graph_repo: OhMyAdolf.GraphRepo,
-  crawler: OhMyAdolf.Crawler,
   crawling: [
-    api_client: OhMyAdolf.Wiki.APIClient,
-    scraper: OhMyAdolf.Wiki.Scraper,
     scraping_limit: 200,
     scraping_timeout: 10_000
   ],

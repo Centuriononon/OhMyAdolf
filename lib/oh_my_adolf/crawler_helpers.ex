@@ -55,7 +55,6 @@ defmodule OhMyAdolf.CrawlerHelpers do
       {:ok, page} <- @api_client.fetch_page(url),
       {:ok, sub_urls_s} <- @scraper.uniq_urls(page)
     ) do
-      Logger.debug("Scraped #{url}")
       {:ok, sub_urls_s}
     else
       {:error, reason} ->
