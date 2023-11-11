@@ -106,6 +106,30 @@ defmodule OhMyAdolf.GraphRepo do
     end
   end
 
+  def register_path([_ | _] = path) do
+    url_hashes =
+      path
+      |> Stream.map(&URI.to_string(&1))
+      |> Enum.map(fn u -> "{url_hash: '#{u}'}" end)
+
+    Neo.conn()
+    |> Neo.query("""
+      // Hashes
+      WITH #{inspect(url_hashes)} AS url_hash_list
+
+      // Pages
+      UNWIND url_hash_list AS url_hash
+      MERGE (p:Page {url_hash: url_hash})
+
+      // Relations
+      WITH url_hash_list
+      UNWIND RANGE(0, SIZE(url_hash_list) - 2) AS id
+      MATCH (abv:Page {url_hash: url_hash_list[id]})
+      MATCH (sub:Page {url_hash: url_hash_list[id + 1]})
+      MERGE (abv)-[:LINKED_TO]->(sub)
+    """)
+  end
+
   defp dec(url) when is_bitstring(url), do: Base.decode64!(url)
   defp enc(url) when is_bitstring(url), do: Base.encode64(url)
 end
