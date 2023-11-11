@@ -74,12 +74,12 @@ defmodule OhMyAdolf.GraphRepo do
             " error code: #{inspect(c)}, message: #{inspect(m)}"
         )
 
-        {:error, "query error"}
+        :error
 
       {:ok, resp} ->
         Logger.info("Related pages; records info: #{inspect(resp.records)}")
 
-        {:ok}
+        :ok
     end
   end
 
@@ -93,16 +93,7 @@ defmodule OhMyAdolf.GraphRepo do
       RETURN COUNT(p) > 0 AS exists
     """)
     |> case do
-      {:error, %Neo.Error{message: m, code: c}} ->
-        Logger.critical(
-          "Could check page for existence;" <>
-            " error code: #{inspect(c)}, message: #{inspect(m)}"
-        )
-
-        {:error, "query error"}
-
-      {:ok, resp} ->
-        Enum.at(resp.results, 0)["exists"]
+      {:ok, resp} -> Enum.at(resp.results, 0)["exists"]
     end
   end
 
@@ -124,10 +115,30 @@ defmodule OhMyAdolf.GraphRepo do
       // Relations
       WITH url_hash_list
       UNWIND RANGE(0, SIZE(url_hash_list) - 2) AS id
-      MATCH (abv:Page {url_hash: url_hash_list[id]})
-      MATCH (sub:Page {url_hash: url_hash_list[id + 1]})
-      MERGE (abv)-[:LINKED_TO]->(sub)
+      MATCH
+        (abv:Page {url_hash: url_hash_list[id]}),
+        (sub:Page {url_hash: url_hash_list[id + 1]})
+      // Skip loop
+      WHERE NOT EXISTS {
+        (abv)-[:REFERS_TO]->(sub)
+      }
+      MERGE (abv)-[r:REFERS_TO]->(sub)
+      RETURN abv, sub
     """)
+    |> case do
+      {:error, %Neo.Error{message: m, code: c}} ->
+        Logger.critical(
+          "Could not register path;" <>
+            " error code: #{inspect(c)}, message: #{inspect(m)}"
+        )
+
+        :error
+
+      {:ok, resp} ->
+        Logger.info("Registered path; records info: #{inspect(resp.records)}")
+
+        :ok
+    end
   end
 
   defp dec(url) when is_bitstring(url), do: Base.decode64!(url)
