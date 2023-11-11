@@ -1,19 +1,40 @@
 defmodule OhMyAdolf.CrawlerHelpers do
   require Logger
 
-  def scraped_urls(urls, config) do
+  @api_client Application.compile_env(
+                :oh_my_adolf,
+                [:crawling, :api_client],
+                OhMyAdolf.Wiki.APIClient
+              )
+  @scraper Application.compile_env(
+             :oh_my_adolf,
+             [:crawling, :scraper],
+             OhMyAdolf.Wiki.Scraper
+           )
+  @chunks Application.compile_env(
+            :oh_my_adolf,
+            [:crawling, :scraping_limit],
+            100
+          )
+  @timeout Application.compile_env(
+             :oh_my_adolf,
+             [:crawling, :scraping_timeout],
+             10_000
+           )
+
+  def scraped_urls(urls) do
     Task.Supervisor.async_stream(
       OhMyAdolf.TaskSupervisor,
       urls,
       fn url ->
         url
-        |> scraped_url(config)
+        |> scraped_url()
         |> Stream.map(fn sub_url -> {url, sub_url} end)
         |> Enum.to_list()
       end,
-      max_concurency: config.chunks,
+      max_concurency: @chunks,
       on_timeout: :kill_task,
-      timeout: 20_000
+      timeout: @timeout
     )
     |> Stream.flat_map(fn
       {:ok, urls} -> urls
@@ -21,17 +42,18 @@ defmodule OhMyAdolf.CrawlerHelpers do
     end)
   end
 
-  def scraped_url(url, config) do
-    case scrape(url, config) do
+  def scraped_url(url) do
+    case scrape(url) do
       {:ok, sub_urls_s} -> sub_urls_s
       _ -> []
     end
   end
 
-  def scrape(url, config) do
+  def scrape(url) do
+    Logger.debug("Scraping: #{url}")
     with(
-      {:ok, page} <- config.api_client.fetch_page(url),
-      {:ok, sub_urls_s} <- config.scraper.uniq_urls(page)
+      {:ok, page} <- @api_client.fetch_page(url),
+      {:ok, sub_urls_s} <- @scraper.uniq_urls(page)
     ) do
       Logger.debug("Scraped #{url}")
       {:ok, sub_urls_s}
@@ -40,18 +62,5 @@ defmodule OhMyAdolf.CrawlerHelpers do
         Logger.warn("Could not scrape #{url} due to #{inspect(reason)}")
         {:error, {url, reason}}
     end
-  end
-
-  def validate_config!(config) do
-    %{
-      chunks: config[:chunks] || 50,
-      api_client: validate_as_req!(config, :api_client),
-      scraper: validate_as_req!(config, :scraper)
-    }
-  end
-
-  def validate_as_req!(config, key) do
-    config[key] ||
-      raise ArgumentError.exception("#{inspect(key)} arg is required")
   end
 end

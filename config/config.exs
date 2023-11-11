@@ -22,12 +22,16 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   live_view: [signing_salt: "NLHuBSjH"]
 
 config :oh_my_adolf,
+  scout: OhMyAdolf.Scout,
+  graph_repo: OhMyAdolf.GraphRepo,
+  crawler: OhMyAdolf.Crawler,
   crawling: [
-    seeking_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
     api_client: OhMyAdolf.Wiki.APIClient,
     scraper: OhMyAdolf.Wiki.Scraper,
-    chunks: 200
+    scraping_limit: 200,
+    scraping_timeout: 10_000
   ],
+  core_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
   wiki_api: [
     host: "en.wikipedia.org",
     http_client: OhMyAdolf.PoisonProxy,
