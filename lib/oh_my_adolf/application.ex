@@ -14,7 +14,8 @@ defmodule OhMyAdolf.Application do
       {OhMyAdolf.Throttle,
        [
          server_name: OhMyAdolf.PoisonProxy,
-         rate_per_sec: Application.get_env(:oh_my_adolf, :wiki_api)[:rate_per_sec]
+         rate_per_sec:
+           Application.get_env(:oh_my_adolf, :poison_proxy)[:rate_per_sec]
        ]},
       # Common task supervisor
       {Task.Supervisor, name: OhMyAdolf.TaskSupervisor},

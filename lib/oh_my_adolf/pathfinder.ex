@@ -27,16 +27,12 @@ defmodule OhMyAdolf.Pathfinder do
           @graph_repo.transaction(fn conn ->
             {:ok, _resp} =
               @graph_repo.register_page_relation(conn, abv_url, url)
+
             @graph_repo.get_shortest_path(conn, start_url, core_url)
           end)
           |> case do
-            {:ok, {:ok, path}} ->
-              Logger.info("Found the seeking path")
-              {:halt, {:ok, path}}
-
-            _ ->
-              Logger.debug("Not found the seeking path")
-              {:cont, not_found_resp}
+            {:ok, {:ok, path}} -> {:halt, {:ok, path}}
+            _ -> {:cont, not_found_resp}
           end
       end
     )

@@ -22,18 +22,17 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   live_view: [signing_salt: "NLHuBSjH"]
 
 config :oh_my_adolf,
-  crawling: [
-    scraping_limit: 200,
-    scraping_timeout: 10_000
-  ],
   core_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
-  wiki_api: [
-    host: "en.wikipedia.org",
-    http_client: OhMyAdolf.PoisonProxy,
-    rate_per_sec: 200
-  ],
+  scraper: OhMyAdolf.Wiki.Scraper,
+  http_client: OhMyAdolf.PoisonProxy,
+  api_client: OhMyAdolf.Wiki.APIClient,
+  max_concurent_scrapers: 200,
+  scraping_timeout: 10_000,
+  wiki_host: "en.wikipedia.org",
+  wiki_api_timeout: 20_000,
   poison_proxy: [
-    timeout: :infinity,
+    rate_per_sec: 200,
+    queue_timeout: :infinity,
     http_client: HTTPoison,
     throttle: OhMyAdolf.PoisonProxy
   ]

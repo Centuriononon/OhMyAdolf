@@ -1,9 +1,12 @@
 defmodule OhMyAdolf.Wiki.APIClient do
-  @behaviour OhMyAdolf.APIClient
+  require Logger
 
-  @impl true
-  def api_url?(%URI{} = url, config \\ default_config()) do
-    host = validate!(config, :host)
+  @http_client Application.compile_env(:oh_my_adolf, :http_client, HTTPoison)
+  @host Application.compile_env(:oh_my_adolf, :wiki_host, HTTPoison)
+  @timeout Application.compile_env(:oh_my_adolf, :wiki_api_timeout, 30_000)
+
+  def api_url?(%URI{} = url) do
+    host = @host
 
     case url do
       %{host: ^host} -> true
@@ -11,26 +14,29 @@ defmodule OhMyAdolf.Wiki.APIClient do
     end
   end
 
-  @impl true
-  def absolute_path(path, config \\ default_config()) do
-    URI.merge("https://" <> validate!(config, :host), path)
+  def absolute_path(path) do
+    URI.merge("https://" <> @host, path)
   end
 
-  @impl true
-  def fetch(%URI{} = url, config \\ default_config()) do
-    http_client = validate!(config, :http_client)
-    headers = validate!(config, :headers)
-    options = validate!(config, :options)
+  def fetch(%URI{} = url) do
+    Logger.debug("Fetching: #{url}")
 
     case api_url?(url) do
-      true -> http_client.get(url, headers, options)
-      false -> {:error, :incorrect_url}
+      true ->
+        @http_client.get(
+          url,
+          [{"User-Agent", "OhMyAdolfTracer"}],
+          follow_redirect: true,
+          timeout: @timeout
+        )
+
+      false ->
+        {:error, :incorrect_url}
     end
   end
 
-  @impl true
-  def fetch_page(%URI{} = url, config \\ default_config()) do
-    case fetch(url, config) do
+  def fetch_page(%URI{} = url) do
+    case fetch(url) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, body}
 
@@ -43,25 +49,5 @@ defmodule OhMyAdolf.Wiki.APIClient do
       {:error, _reason} = err ->
         err
     end
-  end
-
-  defp default_config() do
-    Application.get_env(:oh_my_adolf, :wiki_api, [])
-  end
-
-  defp validate!(config, :host) do
-    Keyword.get(config, :host, "en.wikipedia.org")
-  end
-
-  defp validate!(config, :http_client) do
-    Keyword.get(config, :http_client, HTTPoison)
-  end
-
-  defp validate!(config, :headers) do
-    Keyword.get(config, :headers, [{"User-Agent", "OhMyAdolfTracer"}])
-  end
-
-  defp validate!(config, :options) do
-    Keyword.get(config, :options, follow_redirect: true, timeout: 30_000)
   end
 end
