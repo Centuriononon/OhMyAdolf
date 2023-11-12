@@ -5,18 +5,11 @@ defmodule OhMyAdolf.GraphRepo do
   require Logger
   alias Bolt.Sips, as: Neo
 
-  # def transaction(func), do: Neo.transaction(Neo.conn(), func)
-  def transaction(func), do: func.()
-
-  def get_shortest_path(%URI{} = url, %URI{} = end_url) do
-    if to_string(url) == to_string(end_url) do
-      {:ok, [url]}
-    else
-      do_get_shortest_path(url, end_url)
-    end
+  def transaction(func) do
+    Neo.transaction(Neo.conn(), fn _conn -> func.() end)
   end
 
-  defp do_get_shortest_path(%URI{} = start_url, %URI{} = end_url) do
+  def get_shortest_path(%URI{} = start_url, %URI{} = end_url) do
     s_str = URI.to_string(start_url)
     e_str = URI.to_string(end_url)
     s_hash = enc(s_str)
@@ -100,6 +93,7 @@ defmodule OhMyAdolf.GraphRepo do
     |> log_query_error()
     |> case do
       {:ok, resp} -> Enum.at(resp.results, 0)["exists"]
+      {:error, _err} = err -> err
     end
   end
 
