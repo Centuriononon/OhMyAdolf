@@ -4,7 +4,6 @@ defmodule OhMyAdolf.GraphRepo do
   """
   require Logger
   alias Bolt.Sips, as: Neo
-  alias OhMyAdolf.GraphRepo.Helpers
 
   def transaction(func) do
     Neo.transaction(Neo.conn(), func)
@@ -15,20 +14,17 @@ defmodule OhMyAdolf.GraphRepo do
         %URI{} = start_url,
         %URI{} = end_url
       ) do
-    s_str = URI.to_string(start_url)
-    e_str = URI.to_string(end_url)
-    s_hash = Helpers.enc(s_str)
-    e_hash = Helpers.enc(e_str)
+    start_hash = enc(start_url)
+    end_hash = enc(end_url)
 
     conn
     |> Neo.query("""
       MATCH
-        (start:Page {url_hash: '#{s_hash}'}),
-        (end:Page {url_hash: '#{e_hash}'}),
+        (start:Page {url_hash: '#{start_hash}'}),
+        (end:Page {url_hash: '#{end_hash}'}),
         path = shortestPath((start)-[:REFERS_TO*]-(end))
       RETURN path;
     """)
-    |> Helpers.log_query_error()
     |> case do
       {:error, %Neo.Error{message: m, code: c}} ->
         Logger.critical(
@@ -40,7 +36,7 @@ defmodule OhMyAdolf.GraphRepo do
 
       {:ok, resp} ->
         with {:ok, path} <- extract_path(resp) do
-          {:ok, Helpers.path_to_urls(path)}
+          {:ok, path_to_urls(path)}
         end
     end
   end
@@ -58,10 +54,8 @@ defmodule OhMyAdolf.GraphRepo do
         %URI{} = abv_url,
         %URI{} = sub_url
       ) do
-    abv_str = URI.to_string(abv_url)
-    sub_str = URI.to_string(sub_url)
-    abv_hash = Helpers.enc(abv_str)
-    sub_hash = Helpers.enc(sub_str)
+    abv_hash = enc(abv_url)
+    sub_hash = enc(sub_url)
 
     conn
     |> Neo.query("""
@@ -69,19 +63,16 @@ defmodule OhMyAdolf.GraphRepo do
       MERGE (sub:Page {url_hash: '#{sub_hash}'})
       MERGE (above)-[:REFERS_TO]->(sub) RETURN above, sub;
     """)
-    |> Helpers.log_query_error()
   end
 
   def exists?(conn \\ Neo.conn(), %URI{} = url) do
-    url_str = URI.to_string(url)
-    url_hash = Helpers.enc(url_str)
+    url_hash = enc(url)
 
     conn
     |> Neo.query("""
       MATCH (p:Page {url_hash: '#{url_hash}'})
       RETURN COUNT(p) > 0 AS exists
     """)
-    |> Helpers.log_query_error()
     |> case do
       {:ok, resp} -> Enum.at(resp.results, 0)["exists"]
       {:error, _err} = err -> err
@@ -94,27 +85,62 @@ defmodule OhMyAdolf.GraphRepo do
       |> Enum.reduce("", fn path, acc_query ->
         query =
           path
-          |> Stream.map(&URI.to_string(&1))
-          |> Enum.map(&Helpers.enc/1)
-          |> Helpers.get_query_register_pages()
+          |> Enum.map(&enc/1)
+          |> get_query_register_pages()
 
         acc_query <> "\n" <> query
       end)
 
     conn
     |> Neo.query(query)
-    |> Helpers.log_query_error()
   end
+
 
   def register_path(conn \\ Neo.conn(), [_ | _] = path) do
     query =
       path
-      |> Stream.map(&URI.to_string(&1))
-      |> Enum.map(&Helpers.enc/1)
-      |> Helpers.get_query_register_pages()
+      |> Enum.map(&enc/1)
+      |> get_query_register_pages()
 
     conn
     |> Neo.query("#{query} RETURN abv, sub")
-    |> Helpers.log_query_error()
   end
+
+  defp get_query_register_pages(url_hashes) do
+    """
+    // Hashes
+    WITH #{inspect(url_hashes)} AS url_hash_list
+
+    // Pages
+    UNWIND url_hash_list AS url_hash
+    MERGE (p:Page {url_hash: url_hash})
+
+    // Relations
+    WITH url_hash_list
+    UNWIND RANGE(0, SIZE(url_hash_list) - 2) AS id
+    MATCH
+      (abv:Page {url_hash: url_hash_list[id]}),
+      (sub:Page {url_hash: url_hash_list[id + 1]})
+    // Skip loop
+    WHERE NOT EXISTS {
+      (abv)-[:REFERS_TO]->(sub)
+    }
+    MERGE (abv)-[r:REFERS_TO]->(sub)
+    """
+  end
+
+  defp path_to_urls(%Neo.Types.Path{} = path) do
+    path
+    |> Neo.Types.Path.graph
+    |> Stream.filter(fn
+      %Neo.Types.Node{} -> true
+      _ -> false
+    end)
+    |> Stream.map(fn node -> node.properties["url_hash"] end)
+    |> Enum.map(&dec/1)
+  end
+
+  defp dec(url_hash), do: url_hash |> Base.decode64!() |> URI.parse()
+  defp enc(%URI{} = url), do: url |> format_url() |> Base.encode64()
+  defp format_url(url), do: url |> URI.to_string() |> String.downcase()
 end

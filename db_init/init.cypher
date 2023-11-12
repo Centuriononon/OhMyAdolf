@@ -1,3 +1,3 @@
 CREATE (:Page {url_hash: "aHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvQWRvbGZfSGl0bGVy"})
-CREATE INDEX ON :Page(url_hash);
-CREATE CONSTRAINT ON (p:Page) ASSERT p.url_hash IS UNIQUE;
+CREATE INDEX page_hash_url_index FOR (p:Page) ON (p.hash_url)
+CREATE CONSTRAINT page_hash_url_constraint for (p:Page) REQUIRE p.url_hash IS UNIQUE
