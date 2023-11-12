@@ -24,7 +24,7 @@ defmodule OhMyAdolf.Wiki.APIClient do
 
     case api_url?(url) do
       true -> http_client.get(url, headers, options)
-      false -> {:error, "got external url: #{url}"}
+      false -> {:error, :incorrect_url}
     end
   end
 

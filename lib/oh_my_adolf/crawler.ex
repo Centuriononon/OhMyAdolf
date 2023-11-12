@@ -45,8 +45,8 @@ defmodule OhMyAdolf.Crawler do
     handle_next({nexts, prevs, chunks})
   end
 
-  defp handle_next({[curr | nexts], prevs, chunks}) do
-    {[curr], {nexts, [curr] ++ prevs, chunks}}
+  defp handle_next({[{abv, sub} = curr | nexts], prevs, chunks}) do
+    {[{abv, sub}], {nexts, [curr] ++ prevs, chunks}}
   end
 
   defp get_finish_handler(url) do

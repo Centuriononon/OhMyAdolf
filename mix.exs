@@ -46,7 +46,7 @@ defmodule OhMyAdolf.MixProject do
       {:floki, "~> 0.35.2"},
       {:httpoison, "~> 2.1.0"},
       {:libgraph, "~> 0.16.0"},
-      {:bolt_sips, "~> 2.0"}
+      {:bolt_sips, "~> 2.0.11"}
     ]
   end
 

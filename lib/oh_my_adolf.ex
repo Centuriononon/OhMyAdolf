@@ -19,8 +19,10 @@ defmodule OhMyAdolf do
             )
             |> URI.parse()
 
-  # Short: "https://en.wikipedia.org/wiki/Nazism" |> URI.parse |> OhMyAdolf.find_path()
-  # Long: "https://en.wikipedia.org/wiki/Penguin" |> URI.parse |> OhMyAdolf.find_path()
+  # 1 hop: "https://en.wikipedia.org/wiki/Nazism"
+  # 2 hops: "https://en.wikipedia.org/wiki/Far-right_politics"
+  # Long: "https://en.wikipedia.org/wiki/Penguin"
+  # |> URI.parse |> OhMyAdolf.find_path
   def find_path(%URI{} = start_url) do
     @pathfinder.find_path(start_url, @core_url)
   end

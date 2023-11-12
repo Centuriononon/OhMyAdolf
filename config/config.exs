@@ -38,8 +38,15 @@ config :oh_my_adolf,
     throttle: OhMyAdolf.PoisonProxy
   ]
 
+# config :bolt_sips,
+#   log: true,
+#   log_hex: false
+
 config :bolt_sips, Bolt,
   url: "bolt://localhost:7687",
+  timeout: 45_000,
+  retry_linear_backoff: [delay: 150, factor: 2, tries: 3],
+  pool_size: 20,
   basic_auth: [
     username: System.get_env("NEO4J_USERNAME", "neo4j"),
     password: System.get_env("NEO4J_PASSWORD", "pass")

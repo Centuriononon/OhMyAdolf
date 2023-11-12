@@ -24,7 +24,7 @@ defmodule OhMyAdolf.Wiki.Scraper do
         {:ok, urls}
 
       _ ->
-        {:error, "bad parse"}
+        {:error, :bad_parse}
     end
   end
 
