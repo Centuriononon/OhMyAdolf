@@ -15,13 +15,8 @@ defmodule OhMyAdolfWeb.Router do
   end
 
   scope "/", OhMyAdolfWeb do
-    pipe_through(:browser)
+    pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", FormLive
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", OhMyAdolfWeb do
-  #   pipe_through :api
-  # end
 end
