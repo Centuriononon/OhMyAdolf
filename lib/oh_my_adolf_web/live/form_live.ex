@@ -2,24 +2,39 @@ defmodule OhMyAdolfWeb.FormLive do
   use OhMyAdolfWeb, :live_view
 
   def mount(_params, _sessions, socket) do
+    socket =
+      assign(socket,
+        url: "https://en.wikipedia.org/wiki/USSR",
+        status: false
+      )
+
     {:ok, socket}
   end
 
   def render(assigns) do
+    # Logic:
+    # when the input is filled, button is clicked the input b
+    # ecomes a loader (static text for now) and button go becomes unclickable
+
+    # when we get response we put it under the form
     ~H"""
-    <div class="container">
-      <h1 class="title">OhMy<span class="adolf avg">Adolf</span></h1>
       <div class="form-group">
-        <p>Enter wiki URL to some Adolfs 🔎</p>
-        <div class="input-group">
-          <input type="text" placeholder="Right here">
-          <button>Go!</button>
-        </div>
+        <%= if not @status do %>
+          <p>Enter wiki URL to find some Adolfs 🔎</p>
+          <div class="input-group">
+            <input value={@url} type="text" placeholder="Right here."/>
+            <button phx-click="find_path">Go!</button>
+          </div>
+        <% else %>
+          <p>Loading!</p>
+        <% end %>
       </div>
-    </div>
     """
   end
 
-  def handle_event do
+  def handle_event("find_path", _, socket) do
+    url = socket.assigns.url
+    socket = assign(socket, status: true, url: "")
+    {:noreply, socket}
   end
 end
