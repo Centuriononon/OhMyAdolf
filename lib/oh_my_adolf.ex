@@ -7,6 +7,7 @@ defmodule OhMyAdolf do
   if it comes from the database, an external API or others.
   """
   require Logger
+  alias __MODULE__
 
   @pathfinder Application.compile_env(
                 :oh_my_adolf,
@@ -25,5 +26,18 @@ defmodule OhMyAdolf do
   # |> URI.parse |> OhMyAdolf.find_path
   def find_path(%URI{} = start_url) do
     @pathfinder.find_path(start_url, @core_url)
+    |> case do
+      {:ok, path} ->
+        {:ok, path}
+
+      {:error, _reason} ->
+        {:error, "Not found"}
+    end
+  end
+
+  def find_path_async_no_link(%URI{} = start_url) do
+    Task.Supervisor.async_nolink(OhMyAdolf.TaskSupervisor, fn ->
+      find_path(start_url)
+    end)
   end
 end
