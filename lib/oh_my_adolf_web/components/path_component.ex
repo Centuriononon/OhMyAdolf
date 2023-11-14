@@ -2,7 +2,7 @@ defmodule OhMyAdolfWeb.PathComponent do
   use Phoenix.Component
 
   def index(assigns) do
-    ~L"""
+    ~H"""
     <div>
     <%= for page <- @path do %>
       <p><%= page %></p>

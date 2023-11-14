@@ -8,14 +8,14 @@
 import Config
 
 config :oh_my_adolf,
-  core_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
-  scraper: OhMyAdolf.Wiki.Scraper,
-  http_client: OhMyAdolf.PoisonProxy,
-  api_client: OhMyAdolf.Wiki.APIClient,
-  max_concurent_scrapers: 200,
-  scraping_timeout: 10_000,
-  wiki_host: "en.wikipedia.org",
-  wiki_api_timeout: 20_000,
+  wiki: [
+    core_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
+    http_client: OhMyAdolf.PoisonProxy,
+    schemas: ~w(http https),
+    host: "en.wikipedia.org"
+  ]
+
+config :oh_my_adolf,
   poison_proxy: [
     rate_per_sec: 200,
     queue_timeout: :infinity,
@@ -23,9 +23,9 @@ config :oh_my_adolf,
     throttle: OhMyAdolf.PoisonProxy
   ]
 
-# config :bolt_sips,
-#   log: true,
-#   log_hex: false
+config :bolt_sips,
+  log: true,
+  log_hex: false
 
 config :bolt_sips, Bolt,
   url: "bolt://localhost:7687",

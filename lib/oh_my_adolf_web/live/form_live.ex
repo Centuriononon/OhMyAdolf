@@ -50,7 +50,7 @@ defmodule OhMyAdolfWeb.FormLive do
       assign(socket,
         loader: true,
         url: "",
-        task: OhMyAdolf.find_path_async_no_link(URI.parse(url))
+        task: start_path_finding(url)
       )
 
     {:noreply, socket}
@@ -113,5 +113,12 @@ defmodule OhMyAdolfWeb.FormLive do
     Logger.debug("Pathfinding task exited with #{inspect(reason)} reason")
 
     {:noreply, socket}
+  end
+
+
+  def start_path_finding(%URI{} = start_url) do
+    Task.Supervisor.async_nolink(OhMyAdolf.TaskSupervisor, fn ->
+      OhMyAdolf.find_path(start_url)
+    end)
   end
 end
