@@ -15,35 +15,32 @@ defmodule OhMyAdolf.Page.Crawler do
     fn ->
       Logger.info("Started crawling #{inspect(start_point)}")
       nexts = List.flatten([scrape(start_point, opts)])
-      {nexts, [], [], opts}
+      {nexts, [], opts}
     end
   end
 
-  defp handle_next({[], [], [], _opts} = acc) do
+  defp handle_next({[], [], _opts} = acc) do
     # there is nothing to process, then halt
     {:halt, acc}
   end
 
-  defp handle_next({[], queue, [], opts}) do
-    # chunking the queue to scrape them separately
-    chunks = Enum.chunk_every(queue, opts.chunks)
-    handle_next({[], [], chunks, opts})
-  end
+  defp handle_next({[], queue, opts}) do
+    chunk = Enum.take(queue, opts.chunks)
+    queue = Enum.drop(queue, opts.chunks)
 
-  defp handle_next({[], queue, [chunk | chunks], opts}) do
-    # scraping the next chunked points
+    # scraping the next chunk of points
     nexts = scrape_many(chunk, opts)
-    handle_next({nexts, queue, chunks, opts})
+    handle_next({nexts, queue, opts})
   end
 
-  defp handle_next({[{:ok, abv, sub} | nexts], queue, chunks, opts}) do
+  defp handle_next({[{:ok, abv, sub} | nexts], queue, opts}) do
     # emit and put the sub point for further scraping
-    {[{:ok, abv, sub}], {nexts, [sub] ++ queue, chunks, opts}}
+    {[{:ok, abv, sub}], {nexts, [sub] ++ queue, opts}}
   end
 
-  defp handle_next({[{:error, point, reason} | nexts], queue, chunks, opts}) do
+  defp handle_next({[{:error, point, reason} | nexts], queue, opts}) do
     # just emit errored scrape
-    {[{:error, point, reason}], {nexts, queue, chunks, opts}}
+    {[{:error, point, reason}], {nexts, queue, opts}}
   end
 
   defp get_finish_handler(start_point) do
