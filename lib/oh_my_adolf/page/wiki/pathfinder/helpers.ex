@@ -9,8 +9,8 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
         )
 
   def add_relation_to_graph(graph, %Page{} = abv, %Page{} = sub) do
-    abv_ref = Page.standard_url(abv.url)
-    sub_ref = Page.standard_url(sub.url)
+    abv_ref = URI.to_string(abv.url)
+    sub_ref = URI.to_string(sub.url)
 
     graph
     |> Graph.add_vertex(abv_ref, abv)
@@ -19,8 +19,8 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
   end
 
   def get_paths_from_graph(graph, %URI{} = start_url, %URI{} = end_url) do
-    start_ref = Page.standard_url(start_url)
-    end_ref = Page.standard_url(end_url)
+    start_ref = URI.to_string(start_url)
+    end_ref = URI.to_string(end_url)
 
     graph
     |> Graph.get_paths(start_ref, end_ref)
@@ -62,13 +62,14 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
             # merge the found tailing path with the accumulated heading paths
             heading_paths = get_paths_from_graph(graph, start_url, sub_url)
 
-            final_paths =
+            [final_path | _] =
+              final_paths =
               Enum.map(heading_paths, &Enum.concat(&1, tailing_path))
 
             # register the final paths
             @repo.register_paths(conn, final_paths)
 
-            {:ok, final_paths[0]}
+            {:ok, final_path}
 
           {:error, _not_found} ->
             Logger.error("Not found the tailing path from the url")

@@ -42,7 +42,6 @@ defmodule OhMyAdolf.Page.Repo do
     end
   end
 
-
   def register_page_relation(
         conn \\ Neo.conn(),
         %Page{} = abv_page,
@@ -148,7 +147,11 @@ defmodule OhMyAdolf.Page.Repo do
     |> Enum.map(&Page.new/1)
   end
 
-  defp dec(url_hash), do: url_hash |> Base.decode64!() |> URI.parse()
-  defp enc(%URI{} = url), do: url |> format_url() |> Base.encode64()
-  defp format_url(url), do: url |> URI.to_string() |> String.downcase()
+  defp dec(url_hash) do
+    url_hash |> Base.decode64!() |> URI.parse()
+  end
+
+  defp enc(%URI{} = url) do
+    url |> Page.standard_url() |> URI.to_string() |> Base.encode64()
+  end
 end

@@ -15,6 +15,9 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
         )
 
   def find_path(%URI{} = start_url, %URI{} = core_url) do
+    start_url = Page.standard_url(start_url)
+    core_url = Page.standard_url(core_url)
+
     @repo.get_shortest_path(start_url, core_url)
     |> case do
       {:error, _not_found} ->

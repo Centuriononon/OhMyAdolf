@@ -5,7 +5,7 @@ defmodule OhMyAdolf.Page do
   defstruct url: nil
 
   def new(%URI{} = url) do
-    %Page{url: url}
+    %Page{url: standard_url(url)}
   end
 
   def canonical?(%Page{} = p1, %Page{} = p2) do
@@ -16,12 +16,11 @@ defmodule OhMyAdolf.Page do
     standard_url(u1) === standard_url(u2)
   end
 
-  def standard_url(%Page{url: url}), do: standard_url(url)
-
   def standard_url(%URI{} = url) do
     url
     |> URI.merge(%{url | port: nil, scheme: "http"})
     |> URI.to_string()
     |> String.downcase()
+    |> URI.parse()
   end
 end
