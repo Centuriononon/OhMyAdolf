@@ -6,7 +6,11 @@ defmodule OhMyAdolf.Page.Wiki.Validators do
           [:wiki, :host],
           "en.wikipedia.org"
         )
-  @schemas Application.compile_env(:oh_my_adolf, [:wiki, :schemas], ~w(https))
+  @schemas Application.compile_env(
+             :oh_my_adolf,
+             [:wiki, :schemas],
+             ~w(https http)
+           )
 
   def valid?(%Page{url: url}), do: valid_url?(url)
 

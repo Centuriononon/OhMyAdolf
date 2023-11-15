@@ -8,11 +8,20 @@ defmodule OhMyAdolf.Page do
     %Page{url: url}
   end
 
-  def equal?(%Page{} = p1, %Page{} = p2) do
-    standard_url(p1.url) === standard_url(p2.url)
+  def canonical?(%Page{} = p1, %Page{} = p2) do
+    canonical?(p1.url, p2.url)
   end
 
-  defp standard_url(%URI{} = url) do
-    url |> URI.to_string() |> String.downcase()
+  def canonical?(%URI{} = u1, %URI{} = u2) do
+    standard_url(u1) === standard_url(u2)
+  end
+
+  def standard_url(%Page{url: url}), do: standard_url(url)
+
+  def standard_url(%URI{} = url) do
+    url
+    |> URI.merge(%{url | port: nil, scheme: "http"})
+    |> URI.to_string()
+    |> String.downcase()
   end
 end

@@ -23,7 +23,7 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
 
   defp find_by_crawl(start_url, core_url) do
     @crawler.crawl(start_url)
-    |> Enum.reduce_while({start_url, core_url}, &handle_emit/2)
+    |> Enum.reduce_while({Graph.new(), start_url, core_url}, &handle_emit/2)
     |> case do
       {:found, path} -> {:ok, path}
       {:error, reason} -> {:error, reason}
@@ -31,34 +31,29 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
     end
   end
 
-  defp handle_emit({:error, %URI{} = url, reason}, _) do
-    Logger.error("Could not start crawling #{url} due to #{inspect(reason)}")
-    {:halt, {:error, reason}}
-  end
-
-  defp handle_emit({:error, %Page{url: url}, reason}, state) do
-    Logger.error("Could not scrape #{url} due to #{inspect(reason)}")
+  defp handle_emit({:error, %Page{} = page, reason}, state) do
+    Logger.error("Could not scrape #{page.url} due to #{inspect(reason)}")
     {:cont, state}
   end
 
   defp handle_emit(
-         {:ok, %Page{url: abv_url}, %Page{url: url}},
-         {start_url, core_url} = state
+         {:ok, %Page{url: abv_url}, %Page{url: sub_url}},
+         {graph, start_url, core_url}
        ) do
-    Logger.debug("Processing relation: #{abv_url} --> #{url}")
+    Logger.debug("Processing relation: #{abv_url} --> #{sub_url}")
 
-    @repo.transaction(fn conn ->
-      {:ok, _resp} =
-        @repo.register_page_relation(conn, abv_url, url)
+    abv_ref = Page.standard_url(abv_url)
+    sub_ref = Page.standard_url(sub_url)
 
-      @repo.get_shortest_path(conn, start_url, core_url)
-    end)
-    |> case do
-      {:ok, {:ok, path}} ->
-        {:halt, {:found, path}}
+    graph = Graph.add_edge(graph, abv_ref, sub_ref)
 
-      _ ->
-        {:cont, state}
+    if Page.canonical?(sub_url, core_url) do
+      start_ref = Page.standard_url(start_url)
+      path = Graph.get_shortest_path(graph, start_ref, sub_ref)
+
+      {:halt, {:found, path}}
+    else
+      {:cont, {graph, start_url, core_url}}
     end
   end
 end

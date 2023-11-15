@@ -15,8 +15,8 @@ defmodule OhMyAdolf do
                 OhMyAdolf.WikiPages
               )
 
-  # 1 hop: "https://en.wikipedia.org/wiki/Nazism"
-  # 2 hops: "https://en.wikipedia.org/wiki/Far-right_politics"
+  # from 1 hop: "https://en.wikipedia.org/wiki/Nazism"
+  # from 2 hops: "https://en.wikipedia.org/wiki/Far-right_politics"
   # Long: "https://en.wikipedia.org/wiki/Penguin"
   # |> URI.parse |> OhMyAdolf.find_path
   defdelegate find_path(url), to: @wiki_pages
