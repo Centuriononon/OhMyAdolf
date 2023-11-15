@@ -18,17 +18,13 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
     |> Graph.add_edge(abv_ref, sub_ref)
   end
 
-  def get_paths_from_graph(graph, %URI{} = start_url, %URI{} = end_url) do
+  def get_shortest_path_from_graph(graph, %URI{} = start_url, %URI{} = end_url) do
     start_ref = URI.to_string(start_url)
     end_ref = URI.to_string(end_url)
 
     graph
-    |> Graph.get_paths(start_ref, end_ref)
-    |> Enum.map(&refs_to_pages(graph, &1))
-  end
-
-  defp refs_to_pages(graph, refs) do
-    Enum.map(refs, &ref_to_page(graph, &1))
+    |> Graph.get_shortest_path(start_ref, end_ref)
+    |> Enum.map(&ref_to_page(graph, &1))
   end
 
   defp ref_to_page(graph, ref) do
@@ -38,7 +34,7 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
   end
 
   def get_path_by_repo_extension(graph, start_url, sub_url, core_url) do
-    # initial check to remove transaction overhead
+    # initial check to avoid transaction overhead
     if @repo.exists?(sub_url) do
       do_get_path_by_repo_extension(graph, start_url, sub_url, core_url)
     else
@@ -47,6 +43,13 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
   end
 
   defp do_get_path_by_repo_extension(graph, start_url, sub_url, core_url) do
+    # Taking the accumulated heading path
+    heading_path =
+      Task.async(fn ->
+        get_shortest_path_from_graph(graph, start_url, sub_url)
+      end)
+      |> Task.await(10_000)
+
     @repo.transaction(fn conn ->
       Logger.debug("Opened transaction to get path by repo extension")
 
@@ -56,18 +59,14 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
 
         # then get the path from the current url to the core one
         case @repo.get_shortest_path(conn, sub_url, core_url) do
-          {:ok, tailing_path} ->
+          {:ok, [_sub_page | tailing_path]} ->
             Logger.debug("Found the tailing path from the url")
 
-            # merge the found tailing path with the accumulated heading paths
-            heading_paths = get_paths_from_graph(graph, start_url, sub_url)
-
-            [final_path | _] =
-              final_paths =
-              Enum.map(heading_paths, &Enum.concat(&1, tailing_path))
+            # merging the paths
+            final_path = Enum.concat(heading_path, tailing_path)
 
             # register the final paths
-            @repo.register_paths(conn, final_paths)
+            @repo.register_path(conn, final_path)
 
             {:ok, final_path}
 

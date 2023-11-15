@@ -34,7 +34,7 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
 
   defp find_by_crawl(start_url, core_url) do
     @crawler.crawl(start_url)
-    |> Enum.reduce_while({Graph.new(), start_url, core_url}, &handle_emit/2)
+    |> Enum.reduce_while({Graph.new(), start_url, core_url, 0}, &handle_emit/2)
     |> case do
       {:found, path} -> {:ok, path}
       {:error, reason} -> {:error, reason}
@@ -54,9 +54,9 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
 
   defp handle_emit(
          {:ok, %Page{url: abv_url} = abv, %Page{url: sub_url} = sub},
-         {graph, start_url, core_url}
+         {graph, start_url, core_url, x}
        ) do
-    # Initiate subgraph every 10k vertexes..?
+    x = x + 1
     Logger.debug("Processing relation: #{abv_url} --> #{sub_url}")
 
     graph = Helpers.add_relation_to_graph(graph, abv, sub)
@@ -67,10 +67,8 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
           "Collecting the accumulated paths..."
       )
 
-      [path | _] =
-        paths = Helpers.get_paths_from_graph(graph, start_url, core_url)
-
-      {:ok, _resp} = @repo.register_paths(paths)
+      path = Helpers.get_shortest_path_from_graph(graph, start_url, core_url)
+      {:ok, _resp} = @repo.register_path(path)
 
       {:halt, {:found, path}}
     else
@@ -81,7 +79,7 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
           {:halt, {:found, path}}
 
         {:error, _not_found} ->
-          {:cont, {graph, start_url, core_url}}
+          {:cont, {graph, start_url, core_url, x}}
       end
     end
   end

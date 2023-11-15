@@ -35,7 +35,7 @@ defmodule OhMyAdolf.Page.Crawler do
 
   defp handle_next({[{:ok, abv, sub} | nexts], queue, opts}) do
     # emit and put the sub point for further scraping
-    {[{:ok, abv, sub}], {nexts, [sub] ++ queue, opts}}
+    {[{:ok, abv, sub}], {nexts, [sub | queue], opts}}
   end
 
   defp handle_next({[{:error, point, reason} | nexts], queue, opts}) do
