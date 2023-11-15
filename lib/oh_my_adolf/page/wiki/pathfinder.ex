@@ -1,6 +1,7 @@
 defmodule OhMyAdolf.Page.Wiki.Pathfinder do
   require Logger
   alias OhMyAdolf.Page
+  alias OhMyAdolf.Page.Wiki.Pathfinder.Helpers
 
   @crawler Application.compile_env(
              :oh_my_adolf,
@@ -10,14 +11,21 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
   @repo Application.compile_env(
           :oh_my_adolf,
           [:wiki, :page_repo],
-          OhMyAdolf.GraphRepo
+          OhMyAdolf.Page.Repo
         )
 
   def find_path(%URI{} = start_url, %URI{} = core_url) do
     @repo.get_shortest_path(start_url, core_url)
     |> case do
-      {:error, _not_found} -> find_by_crawl(start_url, core_url)
-      {:ok, path} -> {:ok, path}
+      {:error, _not_found} ->
+        with {:ok, path} <- find_by_crawl(start_url, core_url) do
+          Logger.debug("Found new path by crawling")
+          {:ok, path}
+        end
+
+      {:ok, path} ->
+        Logger.debug("Found the path registered in the repo")
+        {:ok, path}
     end
   end
 
@@ -31,29 +39,47 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
     end
   end
 
+  defp handle_emit({:error, %URI{} = url, reason}, _) do
+    Logger.error("Could start crawling #{url} due to #{inspect(reason)}")
+    {:halt, {:error, reason}}
+  end
+
   defp handle_emit({:error, %Page{} = page, reason}, state) do
     Logger.error("Could not scrape #{page.url} due to #{inspect(reason)}")
     {:cont, state}
   end
 
   defp handle_emit(
-         {:ok, %Page{url: abv_url}, %Page{url: sub_url}},
+         {:ok, %Page{url: abv_url} = abv, %Page{url: sub_url} = sub},
          {graph, start_url, core_url}
        ) do
+    # Initiate subgraph every 10k vertexes..?
     Logger.debug("Processing relation: #{abv_url} --> #{sub_url}")
 
-    abv_ref = Page.standard_url(abv_url)
-    sub_ref = Page.standard_url(sub_url)
-
-    graph = Graph.add_edge(graph, abv_ref, sub_ref)
+    graph = Helpers.add_relation_to_graph(graph, abv, sub)
 
     if Page.canonical?(sub_url, core_url) do
-      start_ref = Page.standard_url(start_url)
-      path = Graph.get_shortest_path(graph, start_ref, sub_ref)
+      Logger.debug(
+        "Found the path by reaching the core url. " <>
+          "Collecting the accumulated paths..."
+      )
+
+      [path | _] =
+        paths = Helpers.get_paths_from_graph(graph, start_url, core_url)
+
+      {:ok, _resp} = @repo.register_paths(paths)
 
       {:halt, {:found, path}}
     else
-      {:cont, {graph, start_url, core_url}}
+      Helpers.get_path_by_repo_extension(graph, start_url, sub_url, core_url)
+      |> case do
+        {:ok, path} ->
+          Logger.debug("Found the path by repo extension")
+          {:halt, {:found, path}}
+
+        {:error, _not_found} ->
+          {:cont, {graph, start_url, core_url}}
+      end
     end
   end
 end

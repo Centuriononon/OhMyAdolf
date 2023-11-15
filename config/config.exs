@@ -25,7 +25,7 @@ config :oh_my_adolf,
   ]
 
 config :bolt_sips,
-  log: true,
+  log: false, # true to log everything
   log_hex: false
 
 config :bolt_sips, Bolt,
