@@ -1,23 +1,20 @@
-defmodule OhMyAdolf.Page.Wiki.Pathfinder do
+defmodule OhMyAdolf.Wiki.Pathfinder do
   require Logger
-  alias OhMyAdolf.Page
-  alias OhMyAdolf.Page.Wiki.Pathfinder.Helpers
+  alias OhMyAdolf.Wiki.WikiURL
+  alias OhMyAdolf.Wiki.Pathfinder.Helpers
 
   @crawler Application.compile_env(
              :oh_my_adolf,
-             [:wiki, :page_crawler],
-             OhMyAdolf.Page.Wiki.Crawler
+             [:wiki, :crawler],
+             OhMyAdolf.Wiki.Crawler
            )
   @repo Application.compile_env(
           :oh_my_adolf,
-          [:wiki, :page_repo],
-          OhMyAdolf.Page.Repo
+          [:wiki, :repo],
+          OhMyAdolf.Wiki.Repo
         )
 
-  def find_path(%URI{} = start_url, %URI{} = core_url) do
-    start_url = Page.standard_url(start_url)
-    core_url = Page.standard_url(core_url)
-
+  def find_path(%WikiURL{} = start_url, %WikiURL{} = core_url) do
     @repo.get_shortest_path(start_url, core_url)
     |> case do
       {:error, _not_found} ->
@@ -34,7 +31,7 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
 
   defp find_by_crawl(start_url, core_url) do
     @crawler.crawl(start_url)
-    |> Enum.reduce_while({Graph.new(), start_url, core_url, 0}, &handle_emit/2)
+    |> Enum.reduce_while({Graph.new(), start_url, core_url}, &handle_emit/2)
     |> case do
       {:found, path} -> {:ok, path}
       {:error, reason} -> {:error, reason}
@@ -42,30 +39,21 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
     end
   end
 
-  defp handle_emit({:error, %URI{} = url, reason}, _) do
-    Logger.error("Could start crawling #{url} due to #{inspect(reason)}")
-    {:halt, {:error, reason}}
-  end
-
-  defp handle_emit({:error, %Page{} = page, reason}, state) do
-    Logger.error("Could not scrape #{page.url} due to #{inspect(reason)}")
+  defp handle_emit({:error, %WikiURL{} = url, reason}, state) do
+    Logger.error("Could not scrape #{url} due to #{inspect(reason)}")
     {:cont, state}
   end
 
   defp handle_emit(
-         {:ok, %Page{url: abv_url} = abv, %Page{url: sub_url} = sub},
-         {graph, start_url, core_url, x}
+         {:ok, %WikiURL{} = abv_url, %WikiURL{} = sub_url},
+         {graph, start_url, core_url}
        ) do
-    x = x + 1
     Logger.debug("Processing relation: #{abv_url} --> #{sub_url}")
 
-    graph = Helpers.add_relation_to_graph(graph, abv, sub)
+    graph = Helpers.add_relation_to_graph(graph, abv_url, sub_url)
 
-    if Page.canonical?(sub_url, core_url) do
-      Logger.debug(
-        "Found the path by reaching the core url. " <>
-          "Collecting the accumulated paths..."
-      )
+    if WikiURL.canonical?(sub_url, core_url) do
+      Logger.debug("Found the path by reaching the core url.")
 
       path = Helpers.get_shortest_path_from_graph(graph, start_url, core_url)
       {:ok, _resp} = @repo.register_path(path)
@@ -79,7 +67,7 @@ defmodule OhMyAdolf.Page.Wiki.Pathfinder do
           {:halt, {:found, path}}
 
         {:error, _not_found} ->
-          {:cont, {graph, start_url, core_url, x}}
+          {:cont, {graph, start_url, core_url}}
       end
     end
   end

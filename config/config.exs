@@ -11,9 +11,8 @@ config :oh_my_adolf,
   wiki: [
     core_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",
     http_client: OhMyAdolf.PoisonProxy,
-    schemas: ~w(http https),
     host: "en.wikipedia.org",
-    page_registry: OhMyAdolf.Page.Registry
+    page_registry: OhMyAdolf.WikiURL.Registry
   ]
 
 config :oh_my_adolf,

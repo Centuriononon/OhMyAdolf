@@ -44,7 +44,7 @@ defmodule OhMyAdolfWeb.FormLive do
   end
 
   def handle_event("find_path", _, socket) do
-    url = socket.assigns.url
+    url = URI.parse(socket.assigns.url)
 
     socket =
       assign(socket,
@@ -72,6 +72,7 @@ defmodule OhMyAdolfWeb.FormLive do
     )
   end
 
+  # Find path result
   def handle_info({_ref, {:ok, path}}, socket) do
     Logger.debug("Found the requested path: #{inspect(path)}")
 
@@ -114,7 +115,6 @@ defmodule OhMyAdolfWeb.FormLive do
 
     {:noreply, socket}
   end
-
 
   def start_path_finding(%URI{} = start_url) do
     Task.Supervisor.async_nolink(OhMyAdolf.TaskSupervisor, fn ->

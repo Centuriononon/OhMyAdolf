@@ -1,39 +1,53 @@
-defmodule OhMyAdolf.Page.Wiki.Pathfinder.Helpers do
+defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
   require Logger
-  alias OhMyAdolf.Page
+  alias OhMyAdolf.Wiki.WikiURL
 
   @repo Application.compile_env(
           :oh_my_adolf,
           [:wiki, :page_repo],
-          OhMyAdolf.Page.Repo
+          OhMyAdolf.Wiki.Repo
         )
 
-  def add_relation_to_graph(graph, %Page{} = abv, %Page{} = sub) do
-    abv_ref = URI.to_string(abv.url)
-    sub_ref = URI.to_string(sub.url)
+  def add_relation_to_graph(
+        graph,
+        %WikiURL{} = abv_url,
+        %WikiURL{} = sub_url
+      ) do
+    abv_ref = WikiURL.to_string(abv_url)
+    sub_ref = WikiURL.to_string(sub_url)
 
+    # registering vertices with WikiURL labels
     graph
-    |> Graph.add_vertex(abv_ref, abv)
-    |> Graph.add_vertex(sub_ref, sub)
+    |> Graph.add_vertex(abv_ref, abv_url)
+    |> Graph.add_vertex(sub_ref, sub_url)
     |> Graph.add_edge(abv_ref, sub_ref)
   end
 
-  def get_shortest_path_from_graph(graph, %URI{} = start_url, %URI{} = end_url) do
-    start_ref = URI.to_string(start_url)
-    end_ref = URI.to_string(end_url)
+  def get_shortest_path_from_graph(
+        graph,
+        %WikiURL{} = start_url,
+        %WikiURL{} = end_url
+      ) do
+    start_ref = WikiURL.to_string(start_url)
+    end_ref = WikiURL.to_string(end_url)
 
     graph
     |> Graph.get_shortest_path(start_ref, end_ref)
-    |> Enum.map(&ref_to_page(graph, &1))
+    |> Enum.map(&extract_label(graph, &1))
   end
 
-  defp ref_to_page(graph, ref) do
+  defp extract_label(graph, ref) do
     graph
     |> Graph.vertex_labels(ref)
     |> List.first()
   end
 
-  def get_path_by_repo_extension(graph, start_url, sub_url, core_url) do
+  def get_path_by_repo_extension(
+        graph,
+        %WikiURL{} = start_url,
+        %WikiURL{} = sub_url,
+        %WikiURL{} = core_url
+      ) do
     # initial check to avoid transaction overhead
     if @repo.exists?(sub_url) do
       do_get_path_by_repo_extension(graph, start_url, sub_url, core_url)

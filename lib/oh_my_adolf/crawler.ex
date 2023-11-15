@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Page.Crawler do
+defmodule OhMyAdolf.Crawler do
   require Logger
 
   def crawl(start_point, scrape_func, opts) do

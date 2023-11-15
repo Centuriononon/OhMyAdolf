@@ -1,11 +1,12 @@
-defmodule OhMyAdolfWeb.PathComponent do
+defmodule OhMyAdolfWeb.LoaderComponent do
   use Phoenix.Component
+  alias OhMyAdolf.Wiki.WikiURL
 
   def index(assigns) do
     ~H"""
     <div>
-    <%= for page <- @path do %>
-      <p><%= page %></p>
+    <%= for %WikiURL{url: url} <- @path do %>
+      <p><%= to_string(url) %></p>
     <% end %>
     </div>
     """

@@ -1,10 +1,10 @@
-defmodule OhMyAdolf.Page.Repo do
+defmodule OhMyAdolf.Wiki.Repo do
   @moduledoc """
-  This is a model over Bolt.Sips for executing queries over the URL based interface.
+  This is a model over Bolt.Sips for executing queries over the Wiki based interface.
   """
   require Logger
   alias Bolt.Sips, as: Neo
-  alias OhMyAdolf.Page
+  alias OhMyAdolf.Wiki.WikiURL
 
   def transaction(func) do
     Neo.transaction(Neo.conn(), func)
@@ -12,8 +12,8 @@ defmodule OhMyAdolf.Page.Repo do
 
   def get_shortest_path(
         conn \\ Neo.conn(),
-        %URI{} = start_url,
-        %URI{} = end_url
+        %WikiURL{} = start_url,
+        %WikiURL{} = end_url
       ) do
     start_hash = enc(start_url)
     end_hash = enc(end_url)
@@ -37,34 +37,12 @@ defmodule OhMyAdolf.Page.Repo do
 
       {:ok, resp} ->
         with {:ok, path} <- extract_path(resp) do
-          {:ok, path_to_pages(path)}
+          {:ok, path_to_urls(path)}
         end
     end
   end
 
-  def register_page_relation(
-        conn \\ Neo.conn(),
-        %Page{} = abv_page,
-        %Page{} = sub_page
-      ) do
-    abv_hash = enc(abv_page.url)
-    sub_hash = enc(sub_page.url)
-
-    conn
-    |> Neo.query("""
-      MERGE (above:Page {url_hash: '#{abv_hash}'})
-      MERGE (sub:Page {url_hash: '#{sub_hash}'})
-      MERGE (above)-[:REFERS_TO]->(sub);
-    """)
-  end
-
-  def exists?(conn \\ Neo.conn(), unit)
-
-  def exists?(conn, %Page{url: url}) do
-    exists?(conn, url)
-  end
-
-  def exists?(conn, %URI{} = url) do
+  def exists?(conn \\ Neo.conn(), %WikiURL{} = url) do
     url_hash = enc(url)
 
     conn
@@ -81,41 +59,17 @@ defmodule OhMyAdolf.Page.Repo do
     end
   end
 
-  def register_paths(conn \\ Neo.conn(), [[_ | _] | _] = paths) do
-    query =
-      paths
-      |> Enum.reduce("", fn path, acc_query ->
-        query = get_query_register_pages(path)
-
-        acc_query <> "\n" <> query
-      end)
-
-    Neo.query(conn, query)
-  end
-
   def register_path(conn \\ Neo.conn(), [_ | _] = path) do
-    query = get_query_register_pages(path)
-
-    Neo.query(conn, query)
-  end
-
-  defp extract_path(%Neo.Response{results: []}) do
-    {:error, :not_found}
-  end
-
-  defp extract_path(%Neo.Response{results: [%{"path" => path}]}) do
-    {:ok, path}
-  end
-
-  defp get_query_register_pages(pages) do
-    url_hashes =
-      pages
-      |> Stream.map(fn %Page{url: url} -> url end)
+    hash_urls =
+      path
       |> Enum.map(&enc/1)
+      |> Enum.map(&~s('#{&1}'))
+      |> Enum.join(",")
 
-    """
+    conn
+    |> Neo.query("""
     // Hashes
-    WITH #{inspect(url_hashes)} AS url_hash_list
+    WITH [#{hash_urls}] AS url_hash_list
 
     // Pages
     UNWIND url_hash_list AS url_hash
@@ -132,10 +86,18 @@ defmodule OhMyAdolf.Page.Repo do
       (abv)-[:REFERS_TO]->(sub)
     }
     MERGE (abv)-[r:REFERS_TO]->(sub)
-    """
+    """)
   end
 
-  defp path_to_pages(%Neo.Types.Path{} = path) do
+  defp extract_path(%Neo.Response{results: []}) do
+    {:error, :not_found}
+  end
+
+  defp extract_path(%Neo.Response{results: [%{"path" => path}]}) do
+    {:ok, path}
+  end
+
+  defp path_to_urls(%Neo.Types.Path{} = path) do
     path
     |> Neo.Types.Path.graph()
     |> Stream.filter(fn
@@ -143,15 +105,14 @@ defmodule OhMyAdolf.Page.Repo do
       _ -> false
     end)
     |> Stream.map(fn node -> node.properties["url_hash"] end)
-    |> Stream.map(&dec/1)
-    |> Enum.map(&Page.new/1)
+    |> Enum.map(&dec/1)
   end
 
   defp dec(url_hash) do
-    url_hash |> Base.decode64!() |> URI.parse()
+    url_hash |> Base.decode64!() |> WikiURL.new!()
   end
 
-  defp enc(%URI{} = url) do
-    url |> Page.standard_url() |> URI.to_string() |> Base.encode64()
+  defp enc(%WikiURL{} = url) do
+    url |> WikiURL.to_string() |> Base.encode64()
   end
 end
