@@ -55,7 +55,7 @@ table {
   --subtext-color: #bef2ff;
   --accent-color: #f39c12;
   --active-color: #3498db;
-  --alert-color: #f16d35;
+  --alert-color: #ee4325;
   --inactive-color: #2c1a1a;
 }
 
@@ -97,6 +97,7 @@ body {
   justify-content: stretch;
   flex-direction: column;
   flex: flex-shrink;
+  max-width: 350px;
 }
 
 .form-container__description {
@@ -108,11 +109,13 @@ body {
 }
 
 .form-container__warning {
-  min-height: 30px;
-  width: 100%;
-  text-align: right;
+  margin-top: 5px;
+  margin-left: 4px;
+  text-align: left;
   font-size: .9em;
   color: var(--alert-color);
+  word-wrap: break-word;
+  min-height: 20px;
 }
 
 .input-group {

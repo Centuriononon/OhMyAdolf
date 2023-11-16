@@ -58,7 +58,7 @@ defmodule OhMyAdolfWeb.FormLive do
   def handle_event("start_search", %{"url" => ""}, socket) do
     socket =
       socket
-      |> assign(warning: "The input must contain links")
+      |> assign(warning: "Don't skip the field!")
 
     {:noreply, socket}
   end

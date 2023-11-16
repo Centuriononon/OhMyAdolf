@@ -35,7 +35,8 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
       {:error, exception} ->
         {:error, exception}
 
-      _ ->
+      x ->
+        Logger.critical("Unexpected error: #{inspect(x)}")
         {:error,
          NotFoundPath.new(
            "Could not find the requested path due" <>
