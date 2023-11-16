@@ -4,7 +4,7 @@ defmodule OhMyAdolfWeb.FormLive do
   alias OhMyAdolf
   alias OhMyAdolfWeb.{PathComponent, LoaderComponent}
 
-  @def_placeholder "Right here."
+  @def_placeholder "Like here."
   @def_url "https://en.wikipedia.org/wiki/Far-right_politics"
 
   def mount(_params, _sessions, socket) do
