@@ -4,12 +4,16 @@ defmodule OhMyAdolfWeb.FormLive do
   alias OhMyAdolf
   alias OhMyAdolfWeb.{PathComponent, LoaderComponent}
 
+  @def_placeholder "Right here."
+  @def_url "https://en.wikipedia.org/wiki/Far-right_politics"
+
   def mount(_params, _sessions, socket) do
     Process.flag(:trap_exit, true)
 
     socket =
       assign(socket,
-        url: "https://en.wikipedia.org/wiki/USSR",
+        url: @def_url,
+        placeholder: @def_placeholder,
         loading: false,
         warning: "",
         task: nil,
@@ -24,15 +28,22 @@ defmodule OhMyAdolfWeb.FormLive do
 
     ~H"""
     <div class={"form-container"}>
-      <%= if @loading do %>
-        <div class={"form-container__blur"}>
-          <p class={"blur__message"}>LOADING...</p>
-        </div>
-      <% end %>
-      <p class="form-container__description">Enter wiki URL to find some Adolfs 🔎</p>
+      <p class="form-container__description">
+        Enter wiki URL to find some Adolfs 🔎
+      </p>
       <div class="input-group">
-        <input class="input-group__input" value={@url} type="text" placeholder="Right here."/>
-        <button class="input-group__button" phx-click="find_path">Go!</button>
+        <input
+          class="input-group__input"
+          value={@url}
+          type="text"
+          placeholder={@placeholder}
+          disabled={@loading}
+        />
+      <%= if @loading do %>
+        <button class="input-group__button button__cancel" phx-click="stop_search">Stop</button>
+      <% else %>
+        <button class="input-group__button" phx-click="start_search">Go!</button>
+      <% end %>
       </div>
       <span class="form-container__warning"><%= @warning %></span>
     </div>
@@ -40,14 +51,34 @@ defmodule OhMyAdolfWeb.FormLive do
     """
   end
 
-  def handle_event("find_path", _, socket) do
+  def handle_event("start_search", _, %{assigns: %{task: nil}} = socket) do
     url = URI.parse(socket.assigns.url)
 
     socket =
       socket
       |> assign(loading: true)
       |> assign(url: "")
+      |> assign(placeholder: "Loading...")
       |> assign(task: start_path_finding(url))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("start_search", _, %{assigns: %{task: _task}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("stop_search", _, %{assigns: %{task: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("stop_search", _, %{assigns: %{task: task}} = socket) do
+    Task.shutdown(task)
+
+    socket =
+      socket
+      |> assign(loading: false)
+      |> assign(placeholder: @def_placeholder)
 
     {:noreply, socket}
   end
@@ -58,6 +89,8 @@ defmodule OhMyAdolfWeb.FormLive do
 
     socket =
       socket
+      |> assign(url: "")
+      |> assign(placeholder: @def_placeholder)
       |> assign(message: nil)
       |> assign(path: path)
       |> assign(loading: false)
@@ -71,6 +104,7 @@ defmodule OhMyAdolfWeb.FormLive do
 
     socket =
       socket
+      |> assign(placeholder: @def_placeholder)
       |> assign(message: reason)
       |> assign(loading: false)
       |> assign(task: nil)
@@ -83,6 +117,7 @@ defmodule OhMyAdolfWeb.FormLive do
 
     socket =
       socket
+      |> assign(placeholder: @def_placeholder)
       |> assign(message: "Something went wrong but we can start over.")
       |> assign(loading: false)
       |> assign(task: nil)

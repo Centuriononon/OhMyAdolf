@@ -56,6 +56,7 @@ table {
   --accent-color: #f39c12;
   --active-color: #3498db;
   --alert-color: #f16d35;
+  --inactive-color: #2c1a1a;
 }
 
 * {
@@ -161,8 +162,20 @@ body {
   text-decoration: none;
 }
 
+.input-group__input::placeholder {
+  color: var(--inactive-color);
+}
+
 .input-group__input:focus {
   border-color: var(--active-color);
+}
+
+.input-group__input:disabled {
+  background-color: var(--inactive-color); 
+}
+
+.input-group__input:disabled::placeholder {
+  color: var(--accent-color); 
 }
 
 .input-group__button {
@@ -177,4 +190,8 @@ body {
 
 .input-group__button:hover {
   background-color: var(--active-color);
+}
+
+.button__cancel {
+  background-color: var(--alert-color);
 }
