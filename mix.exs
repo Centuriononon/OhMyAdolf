@@ -8,6 +8,7 @@ defmodule OhMyAdolf.MixProject do
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      consolidate_protocols: Mix.env() != :dev,
       aliases: aliases(),
       deps: deps()
     ]
@@ -26,7 +27,6 @@ defmodule OhMyAdolf.MixProject do
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
-
   # Specifies your project dependencies.
   #
   # Type `mix help deps` for examples and options.

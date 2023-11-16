@@ -1,4 +1,4 @@
-defmodule OhMyAdolfWeb.PathComponent do
+defmodule OhMyAdolfWeb.LoaderComponent do
   use Phoenix.Component
 
   def index(assigns) do

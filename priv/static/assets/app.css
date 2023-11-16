@@ -70,7 +70,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.container {
+.main {
   margin-top: 80px;
   text-align: center;
   display: flex;
@@ -78,18 +78,19 @@ body {
   align-items: center;
 }
 
-.container .title {
+.main__title {
   font-size: 5em;
   font-style: italic;
   font-weight: bold;
   color: var(--text-color);
 }
 
-.container .title .adolf {
+.main__title__highlight {
   color: var(--accent-color);
 }
 
-.form-group {
+.form-container {
+  position: relative;
   margin-top: 105px;
   display: flex;
   justify-content: stretch;
@@ -97,7 +98,7 @@ body {
   flex: flex-shrink;
 }
 
-.form-group .intro {
+.form-container__description {
   text-align: left;
   font-size: 1em;
   margin: 0 0 5px 5px;
@@ -105,21 +106,50 @@ body {
   color: var(--subtext-color);
 }
 
-.form-group .warn {
-  margin: 10px 5px 0 0;
+.form-container__warning {
+  min-height: 30px;
+  width: 100%;
   text-align: right;
   font-size: .9em;
   color: var(--alert-color);
 }
 
-.form-group .input-group {
+.form-container__blur {
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(5, 13, 17, 0.95);
+  box-shadow: 0px 0px 15px 10px rgba(5, 13, 17, 0.95);
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.blur__message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -80%);
+  color: var(--accent-color);
+  font-size: 1.1em;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.input-group {
   display: flex;
   align-items: start;
   height: 35px;
   width: 350px;
 }
 
-.input-group .input {
+.input-group__input {
   width: 100%;
   height: 100%;
   padding: 8px 12px;
@@ -132,11 +162,11 @@ body {
   text-decoration: none;
 }
 
-.input-group .input:focus {
+.input-group__input:focus {
   border-color: var(--active-color);
 }
 
-.input-group .btn {
+.input-group__button {
   width: 20%;
   height: 100%;
   background-color: var(--accent-color);
@@ -146,6 +176,7 @@ body {
   margin-left: 5px;
 }
 
-.input-group .btn:hover {
+.input-group__button:hover {
   background-color: var(--active-color);
 }
+
