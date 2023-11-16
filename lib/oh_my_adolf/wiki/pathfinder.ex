@@ -15,17 +15,12 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
         )
 
   def find_path(%WikiURL{} = start_url, %WikiURL{} = core_url) do
-    @repo.get_shortest_path(start_url, core_url)
-    |> case do
-      {:error, _not_found} ->
-        with {:ok, path} <- find_by_crawl(start_url, core_url) do
-          Logger.debug("Found new path by crawling")
-          {:ok, path}
-        end
-
-      {:ok, path} ->
-        Logger.debug("Found the path registered in the repo")
-        {:ok, path}
+    if WikiURL.canonical?(start_url, core_url) do
+      {:ok, [core_url]}
+    else
+      with {:error, _} <- @repo.get_shortest_path(start_url, core_url) do
+        find_by_crawl(start_url, core_url)
+      end
     end
   end
 

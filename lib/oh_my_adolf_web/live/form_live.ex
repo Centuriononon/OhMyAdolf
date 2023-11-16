@@ -2,7 +2,7 @@ defmodule OhMyAdolfWeb.FormLive do
   use OhMyAdolfWeb, :live_view
   require Logger
   alias OhMyAdolf
-  alias OhMyAdolfWeb.{PathComponent, LoaderComponent}
+  alias OhMyAdolfWeb.PathComponent
 
   @def_placeholder "Like here."
   @def_url "https://en.wikipedia.org/wiki/Far-right_politics"
@@ -27,7 +27,10 @@ defmodule OhMyAdolfWeb.FormLive do
     IO.puts("Current assigns: #{inspect(assigns)}")
 
     ~H"""
-    <div class={"form-container"}>
+    <form
+      class="form-container"
+      phx-submit={"#{ if @loading, do: 'stop_search', else: 'start_search'}"}
+    >
       <p class="form-container__description">
         Enter wiki URL to find some Adolfs 🔎
       </p>
@@ -35,37 +38,38 @@ defmodule OhMyAdolfWeb.FormLive do
         <input
           class="input-group__input"
           value={@url}
+          name="url"
           type="text"
           placeholder={@placeholder}
-          disabled={@loading}
-        />
+          disabled={@loading}/>
       <%= if @loading do %>
-        <button class="input-group__button button__cancel" phx-click="stop_search">Stop</button>
+        <button
+          class="input-group__button button__cancel">Stop</button>
       <% else %>
-        <button class="input-group__button" phx-click="start_search">Go!</button>
+        <button class="input-group__button">Go!</button>
       <% end %>
       </div>
       <span class="form-container__warning"><%= @warning %></span>
-    </div>
+    </form>
     <PathComponent.index path={@path}/>
     """
   end
 
-  def handle_event("start_search", _, %{assigns: %{task: nil}} = socket) do
-    IO.puts("Got to send: #{socket.assigns.url}")
-    url = URI.parse(socket.assigns.url)
+  def handle_event("start_search", params, %{assigns: %{task: nil}} = socket) do
+    uri = URI.parse(params["url"] || "")
+    IO.puts("Got to send: #{uri}")
 
     socket =
       socket
       |> assign(loading: true)
       |> assign(url: "")
       |> assign(placeholder: "Loading...")
-      |> assign(task: start_path_finding(url))
+      |> assign(task: start_path_finding(uri))
 
     {:noreply, socket}
   end
 
-  def handle_event("start_search", _, %{assigns: %{task: _task}} = socket) do
+  def handle_event("start_search", _, socket) do
     {:noreply, socket}
   end
 
