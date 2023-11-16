@@ -36,7 +36,8 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
         {:error, exception}
 
       {%Graph{}, %WikiURL{}, %WikiURL{}} ->
-        exc = NotFoundPath.new("Unavailable API source to perform the search yet")
+        exc =
+          NotFoundPath.new("Unavailable API source to perform the search yet")
 
         {:error, exc}
     end
@@ -56,29 +57,21 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
     graph = Helpers.add_relation_to_graph(graph, abv_url, sub_url)
 
     if WikiURL.canonical?(sub_url, core_url) do
-      get_path_from_graph(graph, start_url, core_url)
+      Logger.debug("Found the path by reaching the core url")
+
+      path = Helpers.get_shortest_path_from_graph(graph, start_url, core_url)
+      {:ok, _resp} = @repo.register_path(path)
+      {:halt, {:found, path}}
     else
-      try_get_path_form_repo(graph, start_url, sub_url, core_url)
+      Helpers.get_path_by_repo_extension(graph, start_url, sub_url, core_url)
+      |> case do
+        {:ok, path} ->
+          Logger.debug("Found the path by repo extension")
+          {:halt, {:found, path}}
+
+        {:error, _not_found} ->
+          {:cont, {graph, start_url, core_url}}
+      end
     end
-  end
-
-  defp try_get_path_form_repo(graph, start_url, sub_url, core_url) do
-    Helpers.get_path_by_repo_extension(graph, start_url, sub_url, core_url)
-    |> case do
-      {:ok, path} ->
-        Logger.debug("Found the path by repo extension")
-        {:halt, {:found, path}}
-
-      {:error, _not_found} ->
-        {:cont, {graph, start_url, core_url}}
-    end
-  end
-
-  defp get_path_from_graph(graph, start_url, core_url) do
-    Logger.debug("Found the path by reaching the core url")
-
-    path = Helpers.get_shortest_path_from_graph(graph, start_url, core_url)
-    {:ok, _resp} = @repo.register_path(path)
-    {:halt, {:found, path}}
   end
 end
