@@ -86,7 +86,7 @@ body {
   color: var(--text-color);
 }
 
-.main__title__highlight {
+.main__title .title__highlight {
   color: var(--accent-color);
 }
 

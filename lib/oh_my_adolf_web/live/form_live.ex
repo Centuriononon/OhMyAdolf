@@ -52,6 +52,7 @@ defmodule OhMyAdolfWeb.FormLive do
   end
 
   def handle_event("start_search", _, %{assigns: %{task: nil}} = socket) do
+    IO.puts("Got to send: #{socket.assigns.url}")
     url = URI.parse(socket.assigns.url)
 
     socket =

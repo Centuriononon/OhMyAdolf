@@ -15,6 +15,8 @@ defmodule OhMyAdolf.Wiki do
             |> WikiURL.new!()
 
   def find_path(%URI{} = uri) do
+    IO.puts("Got to check: #{uri}")
+
     with {:ok, url} <- WikiURL.new(uri) do
       @pathfinder.find_path(url, @core_url)
     end
