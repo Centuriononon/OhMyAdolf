@@ -69,6 +69,7 @@ defmodule OhMyAdolfWeb.FormLive do
     socket =
       socket
       |> assign(loading: true)
+      |> assign(warning: nil)
       |> assign(url: "")
       |> assign(placeholder: "Loading...")
       |> assign(task: start_path_finding(uri))

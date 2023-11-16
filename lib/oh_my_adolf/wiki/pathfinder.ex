@@ -35,13 +35,10 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
       {:error, exception} ->
         {:error, exception}
 
-      x ->
-        Logger.critical("Unexpected error: #{inspect(x)}")
-        {:error,
-         NotFoundPath.new(
-           "Could not find the requested path due" <>
-             " to external problems or internal failure"
-         )}
+      {%Graph{}, %WikiURL{}, %WikiURL{}} ->
+        exc = NotFoundPath.new("Unavailable API source to perform the search yet")
+
+        {:error, exc}
     end
   end
 
