@@ -64,7 +64,7 @@ defmodule OhMyAdolfWeb.FormLive do
   end
 
   def handle_event("start_search", params, %{assigns: %{task: nil}} = socket) do
-    uri = params["url"] |> URI.parse()
+    uri = params["url"] |> String.trim(" ") |> URI.parse()
 
     socket =
       socket
