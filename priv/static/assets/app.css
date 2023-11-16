@@ -122,7 +122,6 @@ body {
   position: absolute;
   background-color: rgba(5, 13, 17, 0.95);
   box-shadow: 0px 0px 15px 10px rgba(5, 13, 17, 0.95);
-  z-index: 1;
   border-radius: 4px;
 }
 
@@ -179,4 +178,3 @@ body {
 .input-group__button:hover {
   background-color: var(--active-color);
 }
-

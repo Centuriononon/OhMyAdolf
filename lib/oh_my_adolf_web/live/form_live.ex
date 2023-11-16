@@ -24,7 +24,7 @@ defmodule OhMyAdolfWeb.FormLive do
 
     ~H"""
     <div class={"form-container"}>
-      <%= if not @loading do %>
+      <%= if @loading do %>
         <div class={"form-container__blur"}>
           <p class={"blur__message"}>LOADING...</p>
         </div>
@@ -98,7 +98,7 @@ defmodule OhMyAdolfWeb.FormLive do
 
   def terminate(reason, %{assigns: %{task: %Task{} = task}}) do
     Logger.debug("Terminating liveview with #{inspect(reason)}")
-    Logger.debub("Shutting down the current running task...")
+    Logger.debug("Shutting down the current running task...")
     Task.shutdown(task)
   end
 
