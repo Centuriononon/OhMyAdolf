@@ -1,6 +1,12 @@
 defmodule OhMyAdolf.Wiki do
   alias OhMyAdolf.Wiki.WikiURL
 
+  @validator Application.compile_env(
+               :oh_my_adolf,
+               [:wiki, :validator],
+               OhMyAdolf.Wiki.Validator
+             )
+
   @pathfinder Application.compile_env(
                 :oh_my_adolf,
                 [:wiki, :pathfinder],
@@ -15,18 +21,8 @@ defmodule OhMyAdolf.Wiki do
             |> WikiURL.new!()
 
   def find_path(%URI{} = uri) do
-    IO.puts("Got to check: #{uri}")
-
-    with {:ok, url} <- WikiURL.new(uri) do
+    with {:ok, url} <- @validator.validated_url(uri) do
       @pathfinder.find_path(url, @core_url)
-    end
-  end
-
-  def validate_uri(%URI{} = url) do
-    if WikiURL.valid_url?(url) do
-      {:ok, url}
-    else
-      {:error, :invalid_url}
     end
   end
 end

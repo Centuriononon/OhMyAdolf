@@ -55,9 +55,16 @@ defmodule OhMyAdolfWeb.FormLive do
     """
   end
 
+  def handle_event("start_search", %{"url" => ""}, socket) do
+    socket =
+      socket
+      |> assign(warning: "The input must contain links")
+
+    {:noreply, socket}
+  end
+
   def handle_event("start_search", params, %{assigns: %{task: nil}} = socket) do
-    uri = URI.parse(params["url"] || "")
-    IO.puts("Got to send: #{uri}")
+    uri = params["url"] |> URI.parse()
 
     socket =
       socket
@@ -96,7 +103,7 @@ defmodule OhMyAdolfWeb.FormLive do
       socket
       |> assign(url: "")
       |> assign(placeholder: @def_placeholder)
-      |> assign(message: nil)
+      |> assign(warning: nil)
       |> assign(path: path)
       |> assign(loading: false)
       |> assign(task: nil)
@@ -104,13 +111,15 @@ defmodule OhMyAdolfWeb.FormLive do
     {:noreply, socket}
   end
 
-  def handle_info({_ref, {:error, reason}}, socket) do
-    Logger.debug("Could not find the requested path due to #{inspect(reason)}")
+  def handle_info({_ref, {:error, exception}}, socket) do
+    Logger.debug(
+      "Could not find the requested path due to #{inspect(exception.message)}"
+    )
 
     socket =
       socket
       |> assign(placeholder: @def_placeholder)
-      |> assign(message: reason)
+      |> assign(warning: exception.message)
       |> assign(loading: false)
       |> assign(task: nil)
 

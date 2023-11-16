@@ -1,6 +1,7 @@
 defmodule OhMyAdolf.Wiki.Scraper do
   require Logger
   alias OhMyAdolf.Wiki.WikiURL
+  alias OhMyAdolf.Wiki.Exception.{FailedParse}
 
   @fetcher Application.compile_env(
              :oh_my_adolf,
@@ -24,12 +25,11 @@ defmodule OhMyAdolf.Wiki.Scraper do
       {:ok, {url, sub_urls}}
     else
       {:error, reason} ->
-        Logger.warning("Could not scrape #{url} due to #{inspect(reason)}")
         {:error, reason}
     end
   end
 
-  def uniq_wiki_urls(html, exclude: urls) when is_bitstring(html) do
+  defp uniq_wiki_urls(html, exclude: urls) when is_bitstring(html) do
     case Floki.parse_document(html) do
       {:ok, document} ->
         urls =
@@ -45,7 +45,8 @@ defmodule OhMyAdolf.Wiki.Scraper do
         {:ok, urls}
 
       _ ->
-        {:error, :bad_parse}
+        exc = FailedParse.new("Could not parse document")
+        {:error, exc}
     end
   end
 end
