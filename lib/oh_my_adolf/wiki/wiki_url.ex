@@ -1,13 +1,6 @@
 defmodule OhMyAdolf.Wiki.WikiURL do
   import Kernel, except: [to_string: 1]
-  alias __MODULE__
-
-  defmodule URIError do
-    defexception [:message, :url]
-  end
-
-  @enforce_keys [:url]
-  defstruct url: nil
+  alias OhMyAdolf.Wiki.Exception.InvalidURL
 
   @host Application.compile_env(
           :oh_my_adolf,
@@ -16,23 +9,11 @@ defmodule OhMyAdolf.Wiki.WikiURL do
         )
         |> String.downcase()
 
-  def new!(uri) when is_bitstring(uri), do: new!(URI.parse(uri))
-
-  def new!(%URI{} = uri) do
-    case new(uri) do
-      {:ok, url} ->
-        url
-
-      {:error, :invalid_url} ->
-        raise WikiURL.URIError, uri: uri, message: "Got unsupported wiki-url"
-    end
-  end
-
-  def new(%URI{} = uri) do
+  def validate_url(%URI{} = uri) do
     if valid_url?(uri) do
-      {:ok, %WikiURL{url: format_url(uri)}}
+      {:ok, uri}
     else
-      {:error, :invalid_url}
+      {:error, InvalidURL.new("Invalid or unsupported url")}
     end
   end
 
@@ -50,13 +31,7 @@ defmodule OhMyAdolf.Wiki.WikiURL do
     URI.parse("https://" <> @host <> path)
   end
 
-  def canonical?(%WikiURL{} = u1, %WikiURL{} = u2) do
-    to_string(u1) === to_string(u2)
-  end
-
-  def to_string(%WikiURL{url: url}), do: URI.to_string(url)
-
-  def format_url(%URI{} = uri) do
+  def format(%URI{} = uri) do
     uri =
       uri
       |> URI.to_string()
@@ -65,10 +40,8 @@ defmodule OhMyAdolf.Wiki.WikiURL do
 
     Map.merge(uri, %{port: nil, host: @host, schema: "https"})
   end
-end
 
-defimpl String.Chars, for: OhMyAdolf.Wiki.WikiURL do
-  alias OhMyAdolf.Wiki.WikiURL
-
-  def to_string(%WikiURL{} = url), do: WikiURL.to_string(url)
+  def canonical?(%URI{} = u1, %URI{} = u2) do
+    format(u1) === format(u2)
+  end
 end

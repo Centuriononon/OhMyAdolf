@@ -1,6 +1,5 @@
 defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
   require Logger
-  alias OhMyAdolf.Wiki.WikiURL
 
   @repo Application.compile_env(
           :oh_my_adolf,
@@ -10,13 +9,12 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
 
   def add_relation_to_graph(
         graph,
-        %WikiURL{} = abv_url,
-        %WikiURL{} = sub_url
+        %URI{} = abv_url,
+        %URI{} = sub_url
       ) do
-    abv_ref = WikiURL.to_string(abv_url)
-    sub_ref = WikiURL.to_string(sub_url)
+    abv_ref = URI.to_string(abv_url)
+    sub_ref = URI.to_string(sub_url)
 
-    # registering vertices with WikiURL labels
     graph
     |> Graph.add_vertex(abv_ref, abv_url)
     |> Graph.add_vertex(sub_ref, sub_url)
@@ -25,11 +23,11 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
 
   def get_shortest_path_from_graph(
         graph,
-        %WikiURL{} = start_url,
-        %WikiURL{} = end_url
+        %URI{} = start_url,
+        %URI{} = end_url
       ) do
-    start_ref = WikiURL.to_string(start_url)
-    end_ref = WikiURL.to_string(end_url)
+    start_ref = URI.to_string(start_url)
+    end_ref = URI.to_string(end_url)
 
     graph
     |> Graph.get_shortest_path(start_ref, end_ref)
@@ -44,9 +42,9 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
 
   def get_path_by_repo_extension(
         graph,
-        %WikiURL{} = start_url,
-        %WikiURL{} = sub_url,
-        %WikiURL{} = core_url
+        %URI{} = start_url,
+        %URI{} = sub_url,
+        %URI{} = core_url
       ) do
     # initial check to avoid transaction overhead
     if @repo.exists?(sub_url) do

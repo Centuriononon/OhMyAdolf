@@ -4,7 +4,6 @@ defmodule OhMyAdolf.Wiki.Repo do
   """
   require Logger
   alias Bolt.Sips, as: Neo
-  alias OhMyAdolf.Wiki.WikiURL
 
   def transaction(func) do
     Neo.transaction(Neo.conn(), func)
@@ -12,8 +11,8 @@ defmodule OhMyAdolf.Wiki.Repo do
 
   def get_shortest_path(
         conn \\ Neo.conn(),
-        %WikiURL{} = start_url,
-        %WikiURL{} = end_url
+        %URI{} = start_url,
+        %URI{} = end_url
       ) do
     start_hash = enc(start_url)
     end_hash = enc(end_url)
@@ -42,7 +41,7 @@ defmodule OhMyAdolf.Wiki.Repo do
     end
   end
 
-  def exists?(conn \\ Neo.conn(), %WikiURL{} = url) do
+  def exists?(conn \\ Neo.conn(), %URI{} = url) do
     url_hash = enc(url)
 
     conn
@@ -108,11 +107,6 @@ defmodule OhMyAdolf.Wiki.Repo do
     |> Enum.map(&dec/1)
   end
 
-  defp dec(url_hash) do
-    url_hash |> Base.decode64!() |> WikiURL.new!()
-  end
-
-  defp enc(%WikiURL{} = url) do
-    url |> WikiURL.to_string() |> Base.encode64()
-  end
+  defp dec(url_hash), do: url_hash |> Base.decode64!() |> URI.parse()
+  defp enc(%URI{} = url), do: url |> URI.to_string() |> Base.encode64()
 end

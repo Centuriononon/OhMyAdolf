@@ -1,6 +1,5 @@
 defmodule OhMyAdolf.Wiki.Pathfinder do
   require Logger
-  alias OhMyAdolf.Wiki.WikiURL
   alias OhMyAdolf.Wiki.Pathfinder.Helpers
   alias OhMyAdolf.Wiki.Exception.NotFoundPath
 
@@ -14,9 +13,17 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
           [:wiki, :repo],
           OhMyAdolf.Wiki.Repo
         )
+  @wiki_url Application.compile_env(
+              :oh_my_adolf,
+              [:wiki, :wiki_url],
+              OhMyAdolf.Wiki.WikiURL
+            )
 
-  def find_path(%WikiURL{} = start_url, %WikiURL{} = core_url) do
-    if WikiURL.canonical?(start_url, core_url) do
+  def find_path(%URI{} = start_url, %URI{} = core_url) do
+    start_url = @wiki_url.format(start_url)
+    core_url = @wiki_url.format(core_url)
+
+    if @wiki_url.canonical?(start_url, core_url) do
       {:ok, [core_url]}
     else
       with {:error, _} <- @repo.get_shortest_path(start_url, core_url) do
@@ -35,7 +42,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
       {:error, exception} ->
         {:error, exception}
 
-      {%Graph{}, %WikiURL{}, %WikiURL{}} ->
+      {%Graph{}, %URI{}, %URI{}} ->
         exc =
           NotFoundPath.new("Unavailable API source to perform the search yet")
 
@@ -43,20 +50,20 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
     end
   end
 
-  defp handle_emit({:error, %WikiURL{} = url, exception}, state) do
+  defp handle_emit({:error, %URI{} = url, exception}, state) do
     Logger.error("Could not scrape #{url} due to #{inspect(exception)}")
     {:cont, state}
   end
 
   defp handle_emit(
-         {:ok, %WikiURL{} = abv_url, %WikiURL{} = sub_url},
+         {:ok, %URI{} = abv_url, %URI{} = sub_url},
          {graph, start_url, core_url}
        ) do
     Logger.debug("Processing relation: #{abv_url} --> #{sub_url}")
 
     graph = Helpers.add_relation_to_graph(graph, abv_url, sub_url)
 
-    if WikiURL.canonical?(sub_url, core_url) do
+    if @wiki_url.canonical?(sub_url, core_url) do
       Logger.debug("Found the path by reaching the core url")
 
       path = Helpers.get_shortest_path_from_graph(graph, start_url, core_url)

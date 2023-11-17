@@ -4,7 +4,7 @@ defmodule OhMyAdolfWeb.FormLive do
   alias OhMyAdolf
   alias OhMyAdolfWeb.PathComponent
 
-  @host Application.get_env(:oh_my_adolf, [:wiki, :host], "en.wikipedia.org")
+  @host Application.compile_env(:oh_my_adolf, [:wiki, :host], "en.wikipedia.org")
   @def_placeholder "Like here."
   @def_url "https://" <> @host <> "/wiki/Far-right_politics"
 

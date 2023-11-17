@@ -1,6 +1,5 @@
 defmodule OhMyAdolf.Wiki.Fetcher do
   require Logger
-  alias OhMyAdolf.Wiki.WikiURL
   alias OhMyAdolf.Wiki.Exception.{UnsuccessfulResponse, FailedFetch}
 
   @http_client Application.compile_env(
@@ -14,11 +13,11 @@ defmodule OhMyAdolf.Wiki.Fetcher do
            )
   @headers Application.compile_env(:oh_my_adolf, [:wiki, :http_headers], [])
 
-  def fetch(%WikiURL{} = url) do
-    @http_client.get(WikiURL.to_string(url), @headers, @options)
+  def fetch(%URI{} = url) do
+    @http_client.get(URI.to_string(url), @headers, @options)
   end
 
-  def fetch_page(%WikiURL{} = url) do
+  def fetch_page(%URI{} = url) do
     case fetch(url) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, body}
