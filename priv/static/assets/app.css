@@ -55,7 +55,7 @@ table {
   --subtext-color: #bef2ff;
   --accent-color: #f39c12;
   --active-color: #3498db;
-  --alert-color: #e9c346;
+  --alert-color: #e96746;
   --inactive-color: #2c1a1a;
 }
 
@@ -86,7 +86,7 @@ body {
   color: var(--text-color);
 }
 
-.main__title .title__highlight {
+.main__title_highlight {
   color: var(--accent-color);
 }
 
@@ -108,14 +108,24 @@ body {
   color: var(--subtext-color);
 }
 
-.form-container__warning {
+.form-container__message {
   margin-top: 5px;
   margin-left: 4px;
   text-align: left;
   font-size: .9em;
-  color: var(--alert-color);
   word-wrap: break-word;
   min-height: 20px;
+  color: var(--text-color);
+}
+
+.form-container__message_alert {
+  margin-top: 5px;
+  margin-left: 4px;
+  text-align: left;
+  font-size: .9em;
+  word-wrap: break-word;
+  min-height: 20px;
+  color: var(--alert-color);
 }
 
 .input-group {
@@ -173,6 +183,7 @@ body {
 }
 
 .path-container {
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;

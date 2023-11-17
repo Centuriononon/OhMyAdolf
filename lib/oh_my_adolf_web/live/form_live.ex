@@ -4,7 +4,11 @@ defmodule OhMyAdolfWeb.FormLive do
   alias OhMyAdolf
   alias OhMyAdolfWeb.PathComponent
 
-  @host Application.compile_env(:oh_my_adolf, [:wiki, :host], "en.wikipedia.org")
+  @host Application.compile_env(
+          :oh_my_adolf,
+          [:wiki, :host],
+          "en.wikipedia.org"
+        )
   @def_placeholder "Like here."
   @def_url "https://" <> @host <> "/wiki/Far-right_politics"
 
@@ -16,7 +20,8 @@ defmodule OhMyAdolfWeb.FormLive do
         url: @def_url,
         placeholder: @def_placeholder,
         loading: false,
-        warning: "",
+        message: "",
+        warn_message?: false,
         task: nil,
         path: []
       )
@@ -50,7 +55,11 @@ defmodule OhMyAdolfWeb.FormLive do
         <button class="input-group__button">Go!</button>
       <% end %>
       </div>
-      <span class="form-container__warning"><%= @warning %></span>
+      <span class={"#{
+        if @warn_message?,
+          do: 'form-container__message_alert',
+          else: 'form-container__message'
+        }"}><%= @message %></span>
     </form>
     <PathComponent.index path={@path}/>
     """
@@ -59,7 +68,8 @@ defmodule OhMyAdolfWeb.FormLive do
   def handle_event("start_search", %{"url" => ""}, socket) do
     socket =
       socket
-      |> assign(warning: "Don't skip the field!")
+      |> assign(message: "Don't skip the field!")
+      |> assign(warn_message?: true)
 
     {:noreply, socket}
   end
@@ -70,7 +80,7 @@ defmodule OhMyAdolfWeb.FormLive do
     socket =
       socket
       |> assign(loading: true)
-      |> assign(warning: nil)
+      |> assign(message: nil)
       |> assign(url: "")
       |> assign(placeholder: "Loading...")
       |> assign(task: start_path_finding(uri))
@@ -86,12 +96,15 @@ defmodule OhMyAdolfWeb.FormLive do
     {:noreply, socket}
   end
 
-  def handle_event("stop_search", _, %{assigns: %{task: task}} = socket) do
-    Task.shutdown(task)
+  def handle_event("stop_search", _, %{assigns: %{task: pid}} = socket) do
+    stop_path_finding(pid)
 
     socket =
       socket
       |> assign(loading: false)
+      |> assign(task: nil)
+      |> assign(warn_message?: false)
+      |> assign(message: "The search is stopped. Brutally.")
       |> assign(placeholder: @def_placeholder)
 
     {:noreply, socket}
@@ -105,10 +118,9 @@ defmodule OhMyAdolfWeb.FormLive do
       socket
       |> assign(url: "")
       |> assign(placeholder: @def_placeholder)
-      |> assign(warning: nil)
+      |> assign(warn_message?: false)
+      |> assign(message: "The search is complete.")
       |> assign(path: path)
-      |> assign(loading: false)
-      |> assign(task: nil)
 
     {:noreply, socket}
   end
@@ -121,20 +133,18 @@ defmodule OhMyAdolfWeb.FormLive do
     socket =
       socket
       |> assign(placeholder: @def_placeholder)
-      |> assign(warning: exception.message)
-      |> assign(loading: false)
-      |> assign(task: nil)
+      |> assign(warn_message?: true)
+      |> assign(message: exception.message)
 
     {:noreply, socket}
   end
 
-  def handle_info({_ref, {:exit, reason}}, socket) do
-    Logger.error("Cought unexpected task exit with #{inspect(reason)} reason")
+  def handle_info({:EXIT, _pid, reason}, socket) do
+    Logger.debug("Pathfinding task is exitting with #{inspect(reason)} reason")
 
     socket =
       socket
       |> assign(placeholder: @def_placeholder)
-      |> assign(message: "Something went wrong but we can start over.")
       |> assign(loading: false)
       |> assign(task: nil)
 
@@ -142,23 +152,26 @@ defmodule OhMyAdolfWeb.FormLive do
   end
 
   def handle_info({:DOWN, _ref, :process, _pid, reason}, socket) do
-    Logger.debug("Pathfinding task exited with #{inspect(reason)} reason")
-
+    Logger.debug("Pathfinding task is down with #{inspect(reason)} reason")
     {:noreply, socket}
   end
 
-  def terminate(reason, %{assigns: %{task: %Task{} = task}}) do
+  def terminate(reason, %{assigns: %{task: nil}}) do
+    Logger.debug("Terminating liveview with #{inspect(reason)}")
+  end
+
+  def terminate(reason, %{assigns: %{task: pid}}) do
     Logger.debug("Terminating liveview with #{inspect(reason)}")
     Logger.debug("Shutting down the current running task...")
+    stop_path_finding(pid)
+  end
+
+  defp stop_path_finding(task) do
     Task.shutdown(task)
   end
 
-  def terminate(reason, _socket) do
-    Logger.debug("Terminating liveview with #{inspect(reason)}")
-  end
-
   defp start_path_finding(%URI{} = start_url) do
-    Task.Supervisor.async_nolink(OhMyAdolf.TaskSupervisor, fn ->
+    Task.Supervisor.async(OhMyAdolf.TaskSupervisor, fn ->
       OhMyAdolf.find_path(start_url)
     end)
   end
