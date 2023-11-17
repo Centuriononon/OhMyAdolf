@@ -13,7 +13,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
     |> Graph.add_edge(abv_ref, sub_ref)
   end
 
-  def get_shortest_path_from_graph(
+  def get_path_from_graph(
         graph,
         %URI{} = start_url,
         %URI{} = end_url

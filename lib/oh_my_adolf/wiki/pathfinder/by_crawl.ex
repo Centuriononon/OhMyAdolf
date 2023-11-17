@@ -3,26 +3,21 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
   alias OhMyAdolf.Wiki.Exception.NotFoundPath
   alias OhMyAdolf.Wiki.Pathfinder.Helpers
 
-  @repo Application.compile_env(
-          :oh_my_adolf,
-          [:wiki, :repo],
-          OhMyAdolf.Wiki.Repo
-        )
   @crawler Application.compile_env(
-    :oh_my_adolf,
-    [:wiki, :crawler],
-    OhMyAdolf.Wiki.Crawler
-  )
+             :oh_my_adolf,
+             [:wiki, :crawler],
+             OhMyAdolf.Wiki.Crawler
+           )
   @wiki_url Application.compile_env(
               :oh_my_adolf,
               [:wiki, :wiki_url],
               OhMyAdolf.Wiki.WikiURL
             )
-  @pathfinder_by_repo Application.compile_env(
-    :oh_my_adolf,
-    [:wiki, :repo],
-    OhMyAdolf.Wiki.Pathfinder.ByRepo
-  )
+  @paths Application.compile_env(
+           :oh_my_adolf,
+           [:wiki, :paths],
+           OhMyAdolf.Wiki.Pathfinder.Paths
+         )
 
   def find_path(start_url, core_url) do
     @crawler.crawl(start_url)
@@ -58,14 +53,26 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
     if @wiki_url.canonical?(sub_url, core_url) do
       Logger.debug("Found the path by reaching the core url")
 
-      path = Helpers.get_shortest_path_from_graph(graph, start_url, core_url)
-      {:ok, _resp} = @repo.register_path(path)
+      path = Helpers.get_path_from_graph(graph, start_url, core_url)
+      {:ok, _resp} = @paths.register_path(path)
       {:halt, {:found, path}}
     else
-      @pathfinder_by_repo.find_path_by_extention(graph, start_url, sub_url, core_url)
+      try_extend_path(graph, sub_url, start_url, core_url)
+    end
+  end
+
+  defp try_extend_path(graph, sub_url, start_url, core_url) do
+    if @paths.registered_url?(sub_url) do
+      path =
+        Task.async(fn ->
+          Helpers.get_path_from_graph(graph, start_url, sub_url)
+        end)
+        |> Task.await(10_000)
+
+      @paths.extend_path(path, core_url)
       |> case do
         {:ok, path} ->
-          Logger.debug("Found the path by repo extension")
+          Logger.debug("Found the path by repo extention")
           {:halt, {:found, path}}
 
         {:error, _not_found} ->
