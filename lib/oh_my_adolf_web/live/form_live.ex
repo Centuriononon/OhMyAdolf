@@ -4,8 +4,9 @@ defmodule OhMyAdolfWeb.FormLive do
   alias OhMyAdolf
   alias OhMyAdolfWeb.PathComponent
 
+  @host Application.get_env(:oh_my_adolf, [:wiki, :host], "en.wikipedia.org")
   @def_placeholder "Like here."
-  @def_url "https://en.wikipedia.org/wiki/Far-right_politics"
+  @def_url "https://" <> @host <> "/wiki/Far-right_politics"
 
   def mount(_params, _sessions, socket) do
     Process.flag(:trap_exit, true)
