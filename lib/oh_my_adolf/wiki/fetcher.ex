@@ -30,7 +30,7 @@ defmodule OhMyAdolf.Wiki.Fetcher do
 
       {:error, %HTTPoison.Error{reason: r}} ->
         exc =
-          FailedFetch.new("Got unexpected httpoison error: " <> to_string(r))
+          FailedFetch.new("Received httpoison error: " <> to_string(r))
 
         {:error, exc}
     end
