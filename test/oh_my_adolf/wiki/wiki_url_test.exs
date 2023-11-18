@@ -6,64 +6,51 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
   @host Application.compile_env!(:oh_my_adolf, [:wiki, :host])
 
   describe "WikiURL validate_url/1 test" do
-    setup :default_setup
-
-    test "should pass root url", params do
-      %{host: host} = params
-
-      url = %URI{host: host, scheme: "http"}
+    test "should pass root url" do
+      url = %URI{host: @host, scheme: "http"}
       assert {:ok, ^url} = WikiURL.validate_url(url)
     end
 
     test "should pass https scheme" do
-      url = %URI{host: "en.wikipedia.org", scheme: "https"}
+      url = %URI{host: @host, scheme: "https"}
       assert {:ok, ^url} = WikiURL.validate_url(url)
     end
 
     test "should pass one and only one wiki url host" do
-      url = %URI{host: "wikipedia.org", scheme: "http"}
+      hosts = ~w(wikipedia.org en.wikipedia.org)
+      [host] = Enum.uniq(hosts, &(&1 !== @host))
+
+      url = %URI{host: host, scheme: "http"}
       assert {:error, %InvalidURL{}} = WikiURL.validate_url(url)
     end
 
-    test "should not change provided URI", params do
-      %{host: host} = params
-
-      url = %URI{host: host, scheme: "http"}
+    test "should not change provided URI" do
+      url = %URI{host: @host, scheme: "http"}
       assert {:ok, ^url} = WikiURL.validate_url(url)
     end
 
-    test "should pass url with an arbitrary path", params do
-      %{host: host} = params
-
-      url = URI.parse("http://" <> host <> "/kokG/koko")
+    test "should pass url with an arbitrary path" do
+      url = URI.parse("http://" <> @host <> "/kokG/koko")
       assert {:ok, ^url} = WikiURL.validate_url(url)
     end
 
-    test "should pass url with arbitrary query string", params do
-      %{host: host} = params
-
-      url = URI.parse("http://" <> host <> "?id=1&h=fd")
+    test "should pass url with arbitrary query string" do
+      url = URI.parse("http://" <> @host <> "?id=1&h=fd")
       assert {:ok, ^url} = WikiURL.validate_url(url)
     end
 
-    test "should not pass url with invalid host", params do
-      %{host: host} = params
-
-      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+    test "should not pass url with invalid host" do
+      invalid_url = %URI{host: @host <> ".x", scheme: "http"}
       assert {:error, _reason} = WikiURL.validate_url(invalid_url)
     end
 
-    test "should not pass url with invalid scheme", params do
-      %{host: host} = params
-
-      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+    test "should not pass url with invalid scheme" do
+      invalid_url = %URI{host: @host <> ".x", scheme: "http"}
       assert {:error, _reason} = WikiURL.validate_url(invalid_url)
     end
 
-    test "should return specific error exception", params do
-      %{host: host} = params
-
-      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+    test "should return specific error exception" do
+      invalid_url = %URI{host: @host <> ".x", scheme: "http"}
 
       assert {:error, %InvalidURL{message: "Invalid or unsupported url"}} =
                WikiURL.validate_url(invalid_url)
@@ -71,64 +58,44 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
   end
 
   describe "WikiURL valid_url?/1 test" do
-    setup :default_setup
-
-    test "should return ture on https scheme", params do
-      %{host: host} = params
-
-      url = %URI{host: host, scheme: "https"}
+    test "should return ture on https scheme" do
+      url = %URI{host: @host, scheme: "https"}
       assert true = WikiURL.valid_url?(url)
     end
 
-    test "should return true on root url", params do
-      %{host: host} = params
-
-      url = %URI{host: host, scheme: "http"}
+    test "should return true on root url" do
+      url = %URI{host: @host, scheme: "http"}
       assert true = WikiURL.valid_url?(url)
     end
 
-    test "should return true on url with arbitrary query string", params do
-      %{host: host} = params
-
-      url = URI.parse("https://" <> host <> "?a=43&b=fddf")
+    test "should return true on url with arbitrary query string" do
+      url = URI.parse("https://" <> @host <> "?a=43&b=fddf")
       assert true = WikiURL.valid_url?(url)
     end
 
-    test "should return true on url with an arbitrary path ", params do
-      %{host: host} = params
-
-      url = URI.parse("http://" <> host <> "/R/u/o")
+    test "should return true on url with an arbitrary path " do
+      url = URI.parse("http://" <> @host <> "/R/u/o")
       assert true = WikiURL.valid_url?(url)
     end
 
-    test "should return false on invalid host", params do
-      %{host: host} = params
-
-      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+    test "should return false on invalid host" do
+      invalid_url = %URI{host: @host <> ".x", scheme: "http"}
       assert false === WikiURL.valid_url?(invalid_url)
     end
 
-    test "should return false on invalid scheme", params do
-      %{host: host} = params
-
-      invalid_url = %URI{host: host, scheme: "ws"}
+    test "should return false on invalid scheme" do
+      invalid_url = %URI{host: @host, scheme: "ws"}
       assert false === WikiURL.valid_url?(invalid_url)
     end
   end
 
   describe "WikiURL valid_host?/1 test" do
-    setup :default_setup
-
-    test "should return true on valid host", params do
-      %{host: host} = params
-
-      assert true = WikiURL.valid_host?(host)
+    test "should return true on valid host" do
+      assert true = WikiURL.valid_host?(@host)
     end
 
-    test "should return false on invalid host", params do
-      %{host: host} = params
-
-      dummy_host = host <> ".x"
+    test "should return false on invalid host" do
+      dummy_host = @host <> ".x"
       assert false === WikiURL.valid_host?(dummy_host)
     end
   end
@@ -217,9 +184,5 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
 
       assert to_string(WikiURL.downcase(url)) === URI.to_string(url)
     end
-  end
-
-  def default_setup(_ctx) do
-    [host: @host]
   end
 end
