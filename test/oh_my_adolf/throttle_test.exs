@@ -14,14 +14,15 @@ defmodule OhMyAdolf.ThrottleTest do
 
     test "should return :await after the rate is exceeded", params do
       %{rate: rate, pid: pid} = params
+      exceed = 12
 
-      tips = Enum.map(1..(rate + 1), fn _ -> Throttle.ask(pid) end)
+      tips = Enum.map(1..(rate + exceed), fn _ -> Throttle.ask(pid) end)
 
-      mb_acts = Enum.take(tips, rate)
-      mb_await = List.last(tips)
+      acts = Enum.take(tips, rate)
+      awaits = Enum.drop(tips, rate)
 
-      assert Enum.all?(mb_acts, &(&1 === :act))
-      assert :await = mb_await
+      assert Enum.all?(acts, &(&1 === :act))
+      assert Enum.all?(awaits, &(&1 === :await))
     end
 
     test "should restart count 1 second after the last ask", params do
