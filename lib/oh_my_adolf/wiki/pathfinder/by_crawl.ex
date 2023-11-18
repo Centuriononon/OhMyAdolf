@@ -16,7 +16,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
   @paths Application.compile_env(
            :oh_my_adolf,
            [:wiki, :paths],
-           OhMyAdolf.Wiki.Pathfinder.Paths
+           OhMyAdolf.Wiki.Paths
          )
 
   def find_path(start_url, core_url) do

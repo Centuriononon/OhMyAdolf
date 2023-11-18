@@ -1,0 +1,225 @@
+defmodule OhMyAdolf.Wiki.WikiURLTest do
+  use ExUnit.Case, async: true
+  alias OhMyAdolf.Wiki.WikiURL
+  alias OhMyAdolf.Wiki.Exception.InvalidURL
+
+  @host Application.compile_env!(:oh_my_adolf, [:wiki, :host])
+
+  describe "WikiURL validate_url/1 test" do
+    setup :default_setup
+
+    test "should pass root url", params do
+      %{host: host} = params
+
+      url = %URI{host: host, scheme: "http"}
+      assert {:ok, ^url} = WikiURL.validate_url(url)
+    end
+
+    test "should pass https scheme" do
+      url = %URI{host: "en.wikipedia.org", scheme: "https"}
+      assert {:ok, ^url} = WikiURL.validate_url(url)
+    end
+
+    test "should pass one and only one wiki url host" do
+      url = %URI{host: "wikipedia.org", scheme: "http"}
+      assert {:error, %InvalidURL{}} = WikiURL.validate_url(url)
+    end
+
+    test "should not change provided URI", params do
+      %{host: host} = params
+
+      url = %URI{host: host, scheme: "http"}
+      assert {:ok, ^url} = WikiURL.validate_url(url)
+    end
+
+    test "should pass url with an arbitrary path", params do
+      %{host: host} = params
+
+      url = URI.parse("http://" <> host <> "/kokG/koko")
+      assert {:ok, ^url} = WikiURL.validate_url(url)
+    end
+
+    test "should pass url with arbitrary query string", params do
+      %{host: host} = params
+
+      url = URI.parse("http://" <> host <> "?id=1&h=fd")
+      assert {:ok, ^url} = WikiURL.validate_url(url)
+    end
+
+    test "should not pass url with invalid host", params do
+      %{host: host} = params
+
+      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+      assert {:error, _reason} = WikiURL.validate_url(invalid_url)
+    end
+
+    test "should not pass url with invalid scheme", params do
+      %{host: host} = params
+
+      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+      assert {:error, _reason} = WikiURL.validate_url(invalid_url)
+    end
+
+    test "should return specific error exception", params do
+      %{host: host} = params
+
+      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+
+      assert {:error, %InvalidURL{message: "Invalid or unsupported url"}} =
+               WikiURL.validate_url(invalid_url)
+    end
+  end
+
+  describe "WikiURL valid_url?/1 test" do
+    setup :default_setup
+
+    test "should return ture on https scheme", params do
+      %{host: host} = params
+
+      url = %URI{host: host, scheme: "https"}
+      assert true = WikiURL.valid_url?(url)
+    end
+
+    test "should return true on root url", params do
+      %{host: host} = params
+
+      url = %URI{host: host, scheme: "http"}
+      assert true = WikiURL.valid_url?(url)
+    end
+
+    test "should return true on url with arbitrary query string", params do
+      %{host: host} = params
+
+      url = URI.parse("https://" <> host <> "?a=43&b=fddf")
+      assert true = WikiURL.valid_url?(url)
+    end
+
+    test "should return true on url with an arbitrary path ", params do
+      %{host: host} = params
+
+      url = URI.parse("http://" <> host <> "/R/u/o")
+      assert true = WikiURL.valid_url?(url)
+    end
+
+    test "should return false on invalid host", params do
+      %{host: host} = params
+
+      invalid_url = %URI{host: host <> ".x", scheme: "http"}
+      assert false === WikiURL.valid_url?(invalid_url)
+    end
+
+    test "should return false on invalid scheme", params do
+      %{host: host} = params
+
+      invalid_url = %URI{host: host, scheme: "ws"}
+      assert false === WikiURL.valid_url?(invalid_url)
+    end
+  end
+
+  describe "WikiURL valid_host?/1 test" do
+    setup :default_setup
+
+    test "should return true on valid host", params do
+      %{host: host} = params
+
+      assert true = WikiURL.valid_host?(host)
+    end
+
+    test "should return false on invalid host", params do
+      %{host: host} = params
+
+      dummy_host = host <> ".x"
+      assert false === WikiURL.valid_host?(dummy_host)
+    end
+  end
+
+  describe "WikiURL valid_scheme?/1 test" do
+    test "should pass http scheme" do
+      assert true = WikiURL.valid_scheme?("http")
+    end
+
+    test "should not https scheme" do
+      assert true = WikiURL.valid_scheme?("https")
+    end
+
+    test "should not pass invalid scheme" do
+      assert false === WikiURL.valid_scheme?("ws")
+    end
+  end
+
+  describe "WikiURL absolute_url/1 test" do
+    test "should parse arbitrary path as URI" do
+      assert %URI{} = WikiURL.absolute_url("/fd/fa---f/fds")
+    end
+
+    test "should parse as valid url" do
+      assert %URI{} = url = WikiURL.absolute_url("/fhaksl/f/32fdsa")
+      assert WikiURL.valid_url?(url)
+    end
+
+    test "should parse path with arbitrary query string as valid url" do
+      assert %URI{} = url = WikiURL.absolute_url("?a=bc=32452")
+      assert WikiURL.valid_url?(url)
+    end
+  end
+
+  describe "WikiURL downcase/1 test" do
+    test "should return URI" do
+      uri = URI.parse("/fafda")
+      assert %URI{} = WikiURL.downcase(uri)
+    end
+
+    test "should return downcased url" do
+      url_str = "htTps://hosT.t/fho.faFd/faf/FFFFda"
+
+      assert %URI{} = url = WikiURL.downcase(URI.parse(url_str))
+      assert URI.to_string(url) === String.downcase(url_str)
+    end
+  end
+
+  describe "WikiURL canonical?/2 test" do
+    test "should return true on provided the same urls" do
+      url = WikiURL.absolute_url("/wiki")
+      assert true = WikiURL.canonical?(url, url)
+    end
+
+    test "should return true on urls with different case" do
+      url_1 = WikiURL.absolute_url("/A/b/C/e")
+      url_2 = WikiURL.absolute_url("/a/B/c/E")
+
+      assert true = WikiURL.canonical?(url_1, url_2)
+    end
+
+    test "should return false on differenct urls" do
+      url_1 = WikiURL.absolute_url("/A/b/C")
+      url_2 = WikiURL.absolute_url("/1/2/3")
+
+      assert false === WikiURL.canonical?(url_1, url_2)
+    end
+  end
+
+  describe "WikiURL format_path?/1 test" do
+    test "should return URI" do
+      assert %URI{} = WikiURL.format_path("/wiki")
+    end
+
+    test "should return valid url" do
+      assert %URI{} = url = WikiURL.format_path("/wiki")
+      assert WikiURL.valid_url?(url)
+    end
+
+    test "should return URI without fragments" do
+      assert %URI{fragment: nil} = WikiURL.format_path("/wiki#anchor")
+    end
+
+    test "should return downcased url" do
+      url = WikiURL.format_path("/WiKi")
+
+      assert to_string(WikiURL.downcase(url)) === URI.to_string(url)
+    end
+  end
+
+  def default_setup(_ctx) do
+    [host: @host]
+  end
+end
