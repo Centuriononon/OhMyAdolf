@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Wiki.Paths do
+defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
   @moduledoc """
   This is a model over Bolt.Sips for executing queries over the Wiki based interface.
   """

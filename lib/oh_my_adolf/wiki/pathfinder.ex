@@ -18,8 +18,8 @@ defmodule OhMyAdolf.Wiki.Pathfinder do
          )
 
   def find_path(%URI{} = start_url, %URI{} = core_url) do
-    start_url = @wiki_url.format(start_url)
-    core_url = @wiki_url.format(core_url)
+    start_url = @wiki_url.downcase(start_url)
+    core_url = @wiki_url.downcase(core_url)
 
     if @wiki_url.canonical?(start_url, core_url) do
       {:ok, [core_url]}
