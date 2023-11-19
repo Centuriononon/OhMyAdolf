@@ -1,5 +1,5 @@
 defmodule OhMyAdolf.Wiki.Parser do
-  alias OhMyAdolf.Wiki.Exception.{BadParse}
+  alias OhMyAdolf.Wiki.Errors.BadParseError
 
   @wiki_url Application.compile_env(
               :oh_my_adolf,
@@ -15,14 +15,15 @@ defmodule OhMyAdolf.Wiki.Parser do
           |> Floki.find("div#bodyContent")
           |> Floki.find("a")
           |> Floki.attribute("href")
-          |> Stream.map(&@wiki_url.format_path/1)
+          |> Stream.map(&@wiki_url.absolute_url/1)
+          |> Stream.map(&@wiki_url.downcase/1)
+          |> Stream.filter(&@wiki_url.valid_url?/1)
           |> Stream.reject(&Enum.member?(urls, &1))
 
-        IO.puts "URLS: #{inspect(urls)}"
         {:ok, urls}
 
       _ ->
-        {:error, BadParse.new("Could not parse document")}
+        {:error, %BadParseError{}}
     end
   end
 end

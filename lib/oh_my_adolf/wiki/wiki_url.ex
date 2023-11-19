@@ -1,5 +1,5 @@
 defmodule OhMyAdolf.Wiki.WikiURL do
-  alias OhMyAdolf.Wiki.Exception.InvalidURL
+  alias OhMyAdolf.Wiki.Errors.InvalidURLError
 
   @host Application.compile_env(
           :oh_my_adolf,
@@ -12,7 +12,7 @@ defmodule OhMyAdolf.Wiki.WikiURL do
     if valid_url?(uri) do
       {:ok, uri}
     else
-      {:error, InvalidURL.new("Invalid or unsupported url")}
+      {:error, %InvalidURLError{}}
     end
   end
 

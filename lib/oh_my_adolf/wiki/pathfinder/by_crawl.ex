@@ -1,6 +1,6 @@
 defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
   require Logger
-  alias OhMyAdolf.Wiki.Exception.NotFoundPath
+  alias OhMyAdolf.Wiki.Errors.NotFoundPathError
   alias OhMyAdolf.Wiki.Pathfinder.Helpers
 
   @crawler Application.compile_env(
@@ -31,7 +31,9 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
 
       {%Graph{}, %URI{}, %URI{}} ->
         exc =
-          NotFoundPath.new("Unavailable API source to perform the search yet")
+          NotFoundPathError.exception(
+            "Unavailable API source to perform the search yet"
+          )
 
         {:error, exc}
     end
