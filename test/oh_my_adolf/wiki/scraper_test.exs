@@ -25,14 +25,14 @@ defmodule OhMyAdolf.Wiki.ScraperTest do
       assert {:ok, _} = Scraper.scrape(%URI{})
     end
 
-    test "should return relation of provided url and its scraped urls" do
+    test "should return sub urls" do
       url = URI.parse("http://host.ho/path")
       sub_url = URI.parse("http://host.ho/pathpath")
 
       expect(FetcherMock, :fetch_page, fn ^url -> {:ok, ""} end)
       stub(ParserMock, :extract_wiki_urls, fn _, _ -> {:ok, [sub_url]} end)
 
-      assert {:ok, {^url, [^sub_url]}} = Scraper.scrape(url)
+      assert {:ok, [^sub_url]} = Scraper.scrape(url)
     end
 
     test "should exclude provded url" do
@@ -44,7 +44,7 @@ defmodule OhMyAdolf.Wiki.ScraperTest do
         {:ok, []}
       end)
 
-      assert {:ok, {^url, []}} = Scraper.scrape(url)
+      assert {:ok, []} = Scraper.scrape(url)
     end
 
     test "should return either on fetch error" do
