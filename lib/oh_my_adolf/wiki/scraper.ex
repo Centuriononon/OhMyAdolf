@@ -1,4 +1,5 @@
 defmodule OhMyAdolf.Wiki.Scraper do
+  @behaviour OhMyAdolf.Wiki.ScraperBehavior
   require Logger
 
   @fetcher Application.compile_env(
@@ -13,6 +14,7 @@ defmodule OhMyAdolf.Wiki.Scraper do
               OhMyAdolf.Wiki.Parser
             )
 
+  @impl true
   def scrape(%URI{} = url) do
     Logger.debug("Scraping: #{url}")
 
@@ -20,7 +22,7 @@ defmodule OhMyAdolf.Wiki.Scraper do
       {:ok, html} <- @fetcher.fetch_page(url),
       {:ok, sub_urls} <- @parser.extract_wiki_urls(html, exclude: [url])
     ) do
-      {:ok, {url, sub_urls}}
+      {:ok, sub_urls}
     else
       {:error, reason} ->
         {:error, reason}
