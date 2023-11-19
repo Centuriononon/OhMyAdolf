@@ -119,14 +119,19 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
       assert %URI{} = WikiURL.absolute_url("/fd/fa---f/fds")
     end
 
-    test "should parse as valid url" do
+    test "should absolute path as valid url" do
       assert %URI{} = url = WikiURL.absolute_url("/fhaksl/f/32fdsa")
       assert WikiURL.valid_url?(url)
     end
 
-    test "should parse path with arbitrary query string as valid url" do
+    test "should absolute query string as valid url" do
       assert %URI{} = url = WikiURL.absolute_url("?a=bc=32452")
       assert WikiURL.valid_url?(url)
+    end
+
+    test "should not absolute path if it is already absolute url" do
+      url = "https://ny.wikipedia.org/wiki/Adolf_Hitler"
+      assert ^url = url |> WikiURL.absolute_url() |> URI.to_string()
     end
   end
 
@@ -165,24 +170,20 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL format_path?/1 test" do
-    test "should return URI" do
-      assert %URI{} = WikiURL.format_path("/wiki")
+  describe "WikiURL absolute_url?/1 test" do
+    test "should return true if url is completely absolute" do
+      url = URI.parse("https://wikipedia.org/wiki")
+      assert true = WikiURL.absolute_url?(url)
     end
 
-    test "should return valid url" do
-      assert %URI{} = url = WikiURL.format_path("/wiki")
-      assert WikiURL.valid_url?(url)
+    test "should return false if url missing scheme" do
+      uri = URI.parse("wikipedia.org/wiki")
+      assert false === WikiURL.absolute_url?(uri)
     end
 
-    test "should return URI without fragments" do
-      assert %URI{fragment: nil} = WikiURL.format_path("/wiki#anchor")
-    end
-
-    test "should return downcased url" do
-      url = WikiURL.format_path("/WiKi")
-
-      assert to_string(WikiURL.downcase(url)) === URI.to_string(url)
+    test "should return false if uri with path only" do
+      uri = URI.parse("/wiki")
+      assert false === WikiURL.absolute_url?(uri)
     end
   end
 end
