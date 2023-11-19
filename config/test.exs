@@ -11,6 +11,8 @@ config :oh_my_adolf, :wiki,
   host: "en.wikipedia.org",
   http_client: OhMyAdolf.HTTPClientMock,
   wiki_url: OhMyAdolf.Wiki.WikiURLMock,
+  parser: OhMyAdolf.Wiki.ParserMock,
+  fetcher: OhMyAdolf.Wiki.FetcherMock,
   http_options: [follow_redirect: true],
   http_headers: [{"User-Agent", "UserAgentTest"}]
 

@@ -1,7 +1,7 @@
 defmodule OhMyAdolf.Wiki.WikiURLTest do
   use ExUnit.Case, async: true
   alias OhMyAdolf.Wiki.WikiURL
-  alias OhMyAdolf.Wiki.Errors.InvalidURLError
+  alias OhMyAdolf.Wiki.InvalidURLError
 
   @host Application.compile_env!(:oh_my_adolf, [:wiki, :host])
 
