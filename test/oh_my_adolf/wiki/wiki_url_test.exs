@@ -18,7 +18,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
 
     test "should pass one and only one wiki url host" do
       hosts = ~w(wikipedia.org en.wikipedia.org)
-      [host] = Enum.uniq(hosts, &(&1 !== @host))
+      [host] = Enum.uniq_by(hosts, &(&1 !== @host))
 
       url = %URI{host: host, scheme: "http"}
       assert {:error, %InvalidURL{}} = WikiURL.validate_url(url)
