@@ -1,3 +1,3 @@
 defmodule OhMyAdolf.Wiki.Errors.InvalidURLError do
-  defexception message: "Received invalid URL"
+  defexception message: "Invalid or unsupported url"
 end
