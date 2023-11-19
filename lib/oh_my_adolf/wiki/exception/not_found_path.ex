@@ -1,3 +1,3 @@
 defmodule OhMyAdolf.Wiki.Exception.NotFoundPath do
-  use OhMyAdolf.Wiki.Exception
+  use OhMyAdolf.Exception
 end

@@ -7,6 +7,12 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   secret_key_base: "01eGUvWvrhjvfUCaTmLCAvdehJDTUcQGJVXyBxU4ncvVvwU2bIsMqbehAFAKIIPl",
   server: false
 
+config :oh_my_adolf, :wiki,
+  host: "en.wikipedia",
+  http_client: OhMyAdolf.HTTPClientMock,
+  http_options: [follow_redirect: true],
+  http_headers: [{"User-Agent", "UserAgentTest"}]
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 

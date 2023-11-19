@@ -1,5 +1,5 @@
 defmodule OhMyAdolf.Wiki.Parser do
-  alias OhMyAdolf.Wiki.Exception.{FailedParse}
+  alias OhMyAdolf.Wiki.Exception.{BadParse}
 
   @wiki_url Application.compile_env(
               :oh_my_adolf,
@@ -22,8 +22,7 @@ defmodule OhMyAdolf.Wiki.Parser do
         {:ok, urls}
 
       _ ->
-        exc = FailedParse.new("Could not parse document")
-        {:error, exc}
+        {:error, BadParse.new("Could not parse document")}
     end
   end
 end

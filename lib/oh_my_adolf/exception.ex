@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Wiki.Exception do
+defmodule OhMyAdolf.Exception do
   defmacro __using__(_) do
     quote do
       defstruct message: nil

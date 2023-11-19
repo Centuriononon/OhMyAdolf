@@ -1,6 +1,6 @@
 defmodule OhMyAdolf.Wiki.Fetcher do
   require Logger
-  alias OhMyAdolf.Wiki.Exception.{UnsuccessfulResponse, FailedFetch}
+  alias OhMyAdolf.Wiki.Exception.{BadResponse, BadRequest}
 
   @http_client Application.compile_env(
                  :oh_my_adolf,
@@ -24,13 +24,13 @@ defmodule OhMyAdolf.Wiki.Fetcher do
 
       {:ok, %HTTPoison.Response{status_code: status}} ->
         exc =
-          UnsuccessfulResponse.new("Received response with #{status} status")
+          BadResponse.new("Received response with #{status} status")
 
         {:error, exc}
 
       {:error, %HTTPoison.Error{reason: r}} ->
         exc =
-          FailedFetch.new("Received httpoison error: " <> to_string(r))
+          BadRequest.new("Received httpoison error: " <> to_string(r))
 
         {:error, exc}
     end
