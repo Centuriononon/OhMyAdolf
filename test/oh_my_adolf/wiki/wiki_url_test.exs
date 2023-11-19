@@ -1,11 +1,11 @@
 defmodule OhMyAdolf.Wiki.WikiURLTest do
   use ExUnit.Case, async: true
   alias OhMyAdolf.Wiki.WikiURL
-  alias OhMyAdolf.Wiki.Exception.InvalidURL
+  alias OhMyAdolf.Wiki.Errors.InvalidURLError
 
   @host Application.compile_env!(:oh_my_adolf, [:wiki, :host])
 
-  describe "WikiURL validate_url/1 test" do
+  describe "Wiki.WikiURL validate_url/1" do
     test "should pass root url" do
       url = %URI{host: @host, scheme: "http"}
       assert {:ok, ^url} = WikiURL.validate_url(url)
@@ -18,10 +18,10 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
 
     test "should pass one and only one wiki url host" do
       hosts = ~w(wikipedia.org en.wikipedia.org)
-      [host] = Enum.uniq_by(hosts, &(&1 !== @host))
+      host = Enum.find(hosts, &(&1 !== @host))
 
       url = %URI{host: host, scheme: "http"}
-      assert {:error, %InvalidURL{}} = WikiURL.validate_url(url)
+      assert {:error, %InvalidURLError{}} = WikiURL.validate_url(url)
     end
 
     test "should not change provided URI" do
@@ -52,12 +52,12 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     test "should return specific error exception" do
       invalid_url = %URI{host: @host <> ".x", scheme: "http"}
 
-      assert {:error, %InvalidURL{message: "Invalid or unsupported url"}} =
+      assert {:error, %InvalidURLError{message: "Invalid or unsupported url"}} =
                WikiURL.validate_url(invalid_url)
     end
   end
 
-  describe "WikiURL valid_url?/1 test" do
+  describe "Wiki.WikiURL valid_url?/1" do
     test "should return ture on https scheme" do
       url = %URI{host: @host, scheme: "https"}
       assert true = WikiURL.valid_url?(url)
@@ -89,7 +89,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL valid_host?/1 test" do
+  describe "Wiki.WikiURL valid_host?/1" do
     test "should return true on valid host" do
       assert true = WikiURL.valid_host?(@host)
     end
@@ -100,7 +100,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL valid_scheme?/1 test" do
+  describe "Wiki.WikiURL valid_scheme?/1" do
     test "should pass http scheme" do
       assert true = WikiURL.valid_scheme?("http")
     end
@@ -114,7 +114,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL absolute_url/1 test" do
+  describe "Wiki.WikiURL absolute_url/1" do
     test "should parse arbitrary path as URI" do
       assert %URI{} = WikiURL.absolute_url("/fd/fa---f/fds")
     end
@@ -135,7 +135,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL downcase/1 test" do
+  describe "Wiki.WikiURL downcase/1" do
     test "should return URI" do
       uri = URI.parse("/fafda")
       assert %URI{} = WikiURL.downcase(uri)
@@ -149,7 +149,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL canonical?/2 test" do
+  describe "Wiki.WikiURL canonical?/2" do
     test "should return true on provided the same urls" do
       url = WikiURL.absolute_url("/wiki")
       assert true = WikiURL.canonical?(url, url)
@@ -170,7 +170,7 @@ defmodule OhMyAdolf.Wiki.WikiURLTest do
     end
   end
 
-  describe "WikiURL absolute_url?/1 test" do
+  describe "Wiki.WikiURL absolute_url?/1" do
     test "should return true if url is completely absolute" do
       url = URI.parse("https://wikipedia.org/wiki")
       assert true = WikiURL.absolute_url?(url)

@@ -2,7 +2,7 @@ defmodule OhMyAdolf.ThrottleTest do
   use ExUnit.Case, async: true
   alias OhMyAdolf.Throttle
 
-  describe "Throttle ask/2 test" do
+  describe "Throttle ask/2" do
     setup :default_setup
 
     test "should return :act before the rate is exceeded", params do

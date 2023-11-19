@@ -8,8 +8,9 @@ config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   server: false
 
 config :oh_my_adolf, :wiki,
-  host: "en.wikipedia",
+  host: "en.wikipedia.org",
   http_client: OhMyAdolf.HTTPClientMock,
+  wiki_url: OhMyAdolf.Wiki.WikiURLMock,
   http_options: [follow_redirect: true],
   http_headers: [{"User-Agent", "UserAgentTest"}]
 

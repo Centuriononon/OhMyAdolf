@@ -8,7 +8,7 @@ defmodule OhMyAdolf.Wiki.FetcherTest do
   @options Application.compile_env!(:oh_my_adolf, [:wiki, :http_options])
   @headers Application.compile_env!(:oh_my_adolf, [:wiki, :http_headers])
 
-  describe "Fetcher fetch/1 test" do
+  describe "Wiki.Fetcher fetch/1" do
     test "should request using the provided but stringified url" do
       url = URI.parse("http://host.foo/path")
       url_str = URI.to_string(url)
