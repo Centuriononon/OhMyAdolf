@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Wiki.Errors.NotFoundPathError do
+defmodule OhMyAdolf.Wiki.NotFoundPathError do
   defexception [:message]
 
   def exception(message) when is_bitstring(message) do

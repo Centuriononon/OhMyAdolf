@@ -1,6 +1,6 @@
 defmodule OhMyAdolf.Wiki.WikiURL do
-  @behaviour OhMyAdolf.Wiki.Behaviors.WikiURLBehavior
-  alias OhMyAdolf.Wiki.Errors.InvalidURLError
+  @behaviour OhMyAdolf.Wiki.WikiURLBehavior
+  alias OhMyAdolf.Wiki.InvalidURLError
 
   @host Application.compile_env(
           :oh_my_adolf,
@@ -10,18 +10,18 @@ defmodule OhMyAdolf.Wiki.WikiURL do
         |> String.downcase()
 
   @impl true
-  def validate_url(%URI{} = uri) do
-    if valid_url?(uri) do
-      {:ok, uri}
+  def validate_url(%URI{} = url) do
+    if valid_url?(url) do
+      {:ok, url}
     else
       {:error, %InvalidURLError{}}
     end
   end
 
   @impl true
-  def valid_url?(%URI{} = uri) do
-    valid_host?(uri.host) &&
-      valid_scheme?(uri.scheme)
+  def valid_url?(%URI{} = url) do
+    valid_host?(url.host) &&
+      valid_scheme?(url.scheme)
   end
 
   @impl true
@@ -36,10 +36,10 @@ defmodule OhMyAdolf.Wiki.WikiURL do
 
   @impl true
   def absolute_url(path) when is_bitstring(path) do
-    uri = URI.parse(path)
+    url = URI.parse(path)
 
-    if absolute_url?(uri) do
-      uri
+    if absolute_url?(url) do
+      url
     else
       URI.parse("https://" <> @host <> path)
     end
@@ -51,8 +51,8 @@ defmodule OhMyAdolf.Wiki.WikiURL do
   end
 
   @impl true
-  def downcase(%URI{} = uri) do
-    uri
+  def downcase(%URI{} = url) do
+    url
     |> URI.to_string()
     |> String.downcase()
     |> URI.parse()

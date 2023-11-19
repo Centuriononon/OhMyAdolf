@@ -1,5 +1,6 @@
 defmodule OhMyAdolf.Wiki.Parser do
-  alias OhMyAdolf.Wiki.Errors.BadParseError
+  @behaviour OhMyAdolf.Wiki.ParserBehavior
+  alias OhMyAdolf.Wiki.BadParseError
 
   @wiki_url Application.compile_env(
               :oh_my_adolf,
@@ -7,6 +8,7 @@ defmodule OhMyAdolf.Wiki.Parser do
               OhMyAdolf.Wiki.WikiURL
             )
 
+  @impl true
   def extract_wiki_urls(html, [exclude: urls_to_exclude] \\ [exclude: []])
       when is_bitstring(html) do
     case Floki.parse_document(html) do

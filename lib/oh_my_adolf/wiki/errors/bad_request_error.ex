@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Wiki.Errors.BadRequestError do
+defmodule OhMyAdolf.Wiki.BadRequestError do
   defexception [:message]
 
   @impl true

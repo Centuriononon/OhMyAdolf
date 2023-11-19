@@ -1,6 +1,7 @@
 defmodule OhMyAdolf.Wiki.Fetcher do
+  @behaviour OhMyAdolf.Wiki.FetcherBehavior
   require Logger
-  alias OhMyAdolf.Wiki.Errors.{BadResponseError, BadRequestError}
+  alias OhMyAdolf.Wiki.{BadResponseError, BadRequestError}
 
   @http_client Application.compile_env(
                  :oh_my_adolf,
@@ -13,10 +14,12 @@ defmodule OhMyAdolf.Wiki.Fetcher do
            )
   @headers Application.compile_env(:oh_my_adolf, [:wiki, :http_headers], [])
 
+  @impl true
   def fetch(%URI{} = url) do
     @http_client.get(URI.to_string(url), @headers, @options)
   end
 
+  @impl true
   def fetch_page(%URI{} = url) do
     case fetch(url) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->

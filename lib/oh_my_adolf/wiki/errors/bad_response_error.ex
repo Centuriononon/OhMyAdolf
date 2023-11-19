@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Wiki.Errors.BadResponseError do
+defmodule OhMyAdolf.Wiki.BadResponseError do
   defexception [:message]
 
   def exception(url: %URI{} = url, status: status) when is_number(status) do

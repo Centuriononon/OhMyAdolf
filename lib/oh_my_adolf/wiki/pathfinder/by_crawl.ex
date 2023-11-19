@@ -1,6 +1,6 @@
 defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
   require Logger
-  alias OhMyAdolf.Wiki.Errors.NotFoundPathError
+  alias OhMyAdolf.Wiki.NotFoundPathError
   alias OhMyAdolf.Wiki.Pathfinder.Helpers
 
   @crawler Application.compile_env(
