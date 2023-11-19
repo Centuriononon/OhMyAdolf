@@ -29,15 +29,18 @@ defmodule OhMyAdolf.Wiki.WikiURL do
     Enum.member?(~w(http https), scheme)
   end
 
-  def format_path(path) when is_bitstring(path) do
-    path
-    |> absolute_url()
-    |> Map.replace(:fragment, nil)
-    |> downcase()
+  def absolute_url(path) when is_bitstring(path) do
+    uri = URI.parse(path)
+
+    if absolute_url?(uri) do
+      uri
+    else
+      URI.parse("https://" <> @host <> path)
+    end
   end
 
-  def absolute_url(path) when is_bitstring(path) do
-    URI.parse("https://" <> @host <> path)
+  def absolute_url?(%URI{} = url) do
+    is_bitstring(url.host) && is_bitstring(url.scheme)
   end
 
   def downcase(%URI{} = uri) do
