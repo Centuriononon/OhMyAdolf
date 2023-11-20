@@ -25,5 +25,14 @@ RUN mix local.hex --force && \
 # Installing deps
 RUN mix deps.get
 
+# Move the entrypoint script
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
+
+# Installing curl to ping neo4j
+RUN apt-get update -y && \
+    apt-get install curl -y
+
 # Here we go
+ENTRYPOINT [ "./entrypoint.sh" ]
 CMD ["mix", "test"]
