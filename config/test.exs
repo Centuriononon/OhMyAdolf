@@ -13,6 +13,9 @@ config :oh_my_adolf, :wiki,
   wiki_url: OhMyAdolf.Wiki.WikiURLMock,
   parser: OhMyAdolf.Wiki.ParserMock,
   fetcher: OhMyAdolf.Wiki.FetcherMock,
+  scraper: OhMyAdolf.Wiki.ScraperMock,
+  scraping_timeout: 1000,
+  scraping_chunks: 10,
   http_options: [follow_redirect: true],
   http_headers: [{"User-Agent", "UserAgentTest"}]
 

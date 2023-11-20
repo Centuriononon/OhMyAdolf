@@ -39,7 +39,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
     end
   end
 
-  defp handle_emit({:error, %URI{} = url, exception}, state) do
+  defp handle_emit({:error, exception, %URI{} = url}, state) do
     Logger.error("Could not scrape #{url} due to #{inspect(exception)}")
     {:cont, state}
   end
