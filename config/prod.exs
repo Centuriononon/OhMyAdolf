@@ -13,3 +13,13 @@ config :logger, level: :info
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
+
+config :bolt_sips, Bolt,
+  url: System.get_env("NEO4J_URL"),
+  timeout: 45_000,
+  retry_linear_backoff: [delay: 150, factor: 2, tries: 3],
+  pool_size: 20,
+  basic_auth: [
+    username: System.get_env("NEO4J_USERNAME"),
+    password: System.get_env("NEO4J_PASSWORD")
+  ]

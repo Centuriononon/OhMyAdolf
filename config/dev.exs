@@ -40,3 +40,14 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Include HEEx debug annotations as HTML comments in rendered markup
 config :phoenix_live_view, :debug_heex_annotations, true
+
+
+config :bolt_sips, Bolt,
+  url: System.get_env("NEO4J_URL"),
+  timeout: 45_000,
+  retry_linear_backoff: [delay: 150, factor: 2, tries: 3],
+  pool_size: 20,
+  basic_auth: [
+    username: System.get_env("NEO4J_USERNAME"),
+    password: System.get_env("NEO4J_PASSWORD")
+  ]

@@ -13,19 +13,25 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 #
 FROM ${BUILDER_IMAGE} AS builder
 
-# Confgiuration
-ARG HTTP_PORT=4444
-ENV HTTP_PORT=${HTTP_PORT}
+WORKDIR /tmp
+
+ARG MIX_ENV
+
+ENV MIX_ENV=${MIX_ENV}
 
 # Installing hex + rebar
-WORKDIR /tmp
 RUN mix local.rebar --force \
   && mix local.hex --force
+
+COPY mix.exs .
+COPY mix.lock .
+
+# Installing deps, compile
+RUN mix do deps.get, clean, compile, phx.digest
+
 COPY . .
 
-# Compile, release
-RUN mix do deps.get, clean, compile \
-  && mkdir -p /tmp/built \ 
+RUN mkdir -p /tmp/built \ 
   && mix release --path /tmp/built 
 
 #
@@ -59,5 +65,4 @@ COPY --from=builder --chown=nobody:root /tmp/built .
 USER nobody
 
 # Here we go
-ENTRYPOINT [ "/home/app/bin/oh_my_adolf" ]
-CMD "start"
+CMD ["/home/app/bin/oh_my_adolf", "start"]

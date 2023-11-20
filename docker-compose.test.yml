@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  server:
+    container_name: oma-test
+    network_mode: host
+    build: 
+      context: .
+      dockerfile: Dockerfile.test
+
+  neo4j:
+    container_name: oma__neo4j-test
+    image: neo4j:4.4.9
+    environment:
+      - NEO4J_AUTH=neo4j/pass
+    ports:
+      - 7688:7687
+      - 7475:7474
+    restart: unless-stopped
+    volumes:
+      - ./db_init:/var/lib/neo4j/db_init/

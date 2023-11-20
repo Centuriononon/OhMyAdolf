@@ -26,19 +26,9 @@ config :bolt_sips,
   log: false, # true to log everything
   log_hex: false
 
-config :bolt_sips, Bolt,
-  url: "bolt://localhost:7687",
-  timeout: 45_000,
-  retry_linear_backoff: [delay: 150, factor: 2, tries: 3],
-  pool_size: 20,
-  basic_auth: [
-    username: System.get_env("NEO4J_USERNAME", "neo4j"),
-    password: System.get_env("NEO4J_PASSWORD", "pass")
-  ]
-
 # Configures the endpoint
 config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
-  url: [host: "localhost", port: System.get_env("HTTP_PORT") || 4000],
+  url: [host: "localhost", port: System.get_env("HTTP_PORT")],
   adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
     formats: [html: OhMyAdolfWeb.ErrorHTML, json: OhMyAdolfWeb.ErrorJSON],

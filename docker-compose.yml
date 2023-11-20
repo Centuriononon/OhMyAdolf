@@ -2,28 +2,32 @@ version: "3.8"
 
 services:
   server:
-    container_name: oh_my_adolf
+    container_name: oma
     build: 
       context: .
       args:
-        HTTP_PORT: ${HTTP_PORT} 
-    env_file: .env
+        MIX_ENV: prod
+    environment:
+      HTTP_PORT: "${HTTP_PORT}" 
+      NEO4J_USERNAME: "${NEO4J_USERNAME}"
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD}"
+      NEO4J_URL: "bolt://localhost:7687"
+      SECRET_KEY_BASE: "no secrets"
     network_mode: host
-    command: start
+    restart: on-failure
     depends_on:
       neo4j:
         condition: service_started
+        
   neo4j:
-    container_name: oh_my_adolf_neo4j
-    image: neo4j:4.4.3-community
+    container_name: oma__neo4j
+    image: neo4j:4.4.9
     ports:
-      - 7474:7474
       - 7687:7687
+      - 7474:7474
     restart: unless-stopped
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
     volumes:
-      - ./db/data:/data
-      - ./db/conf:/conf
-      - ./db/logs:/logs
+      - ./db/data:/var/lib/neo4j/data
       - ./db_init:/var/lib/neo4j/db_init/

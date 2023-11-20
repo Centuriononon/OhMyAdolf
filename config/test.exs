@@ -4,7 +4,8 @@ import Config
 # you can enable the server option below.
 config :oh_my_adolf, OhMyAdolfWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "01eGUvWvrhjvfUCaTmLCAvdehJDTUcQGJVXyBxU4ncvVvwU2bIsMqbehAFAKIIPl",
+  secret_key_base:
+    "01eGUvWvrhjvfUCaTmLCAvdehJDTUcQGJVXyBxU4ncvVvwU2bIsMqbehAFAKIIPl",
   server: false
 
 config :oh_my_adolf, :wiki,
@@ -18,6 +19,13 @@ config :oh_my_adolf, :wiki,
   scraping_chunks: 10,
   http_options: [follow_redirect: true],
   http_headers: [{"User-Agent", "UserAgentTest"}]
+
+config :bolt_sips, Bolt,
+  url: "bolt://localhost:7688",
+  basic_auth: [
+    username: "neo4j",
+    password: "pass"
+  ]
 
 # Print only warnings and errors during test
 config :logger, level: :warning
