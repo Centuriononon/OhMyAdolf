@@ -20,7 +20,7 @@ defmodule OhMyAdolf.Wiki.ScraperTest do
       page = "<html>Hi</html>"
 
       expect(FetcherMock, :fetch_page, fn _ -> {:ok, page} end)
-      stub(ParserMock, :extract_wiki_urls, fn ^page, _ -> {:ok, []} end)
+      expect(ParserMock, :extract_wiki_urls, fn ^page, _ -> {:ok, []} end)
 
       assert {:ok, _} = Scraper.scrape(%URI{})
     end
@@ -30,7 +30,7 @@ defmodule OhMyAdolf.Wiki.ScraperTest do
       sub_url = URI.parse("http://host.ho/pathpath")
 
       expect(FetcherMock, :fetch_page, fn ^url -> {:ok, ""} end)
-      stub(ParserMock, :extract_wiki_urls, fn _, _ -> {:ok, [sub_url]} end)
+      expect(ParserMock, :extract_wiki_urls, fn _, _ -> {:ok, [sub_url]} end)
 
       assert {:ok, [^sub_url]} = Scraper.scrape(url)
     end
@@ -40,7 +40,7 @@ defmodule OhMyAdolf.Wiki.ScraperTest do
 
       expect(FetcherMock, :fetch_page, fn ^url -> {:ok, ""} end)
 
-      stub(ParserMock, :extract_wiki_urls, fn _, exclude: [^url] ->
+      expect(ParserMock, :extract_wiki_urls, fn _, exclude: [^url] ->
         {:ok, []}
       end)
 
@@ -50,16 +50,16 @@ defmodule OhMyAdolf.Wiki.ScraperTest do
     test "should return either on fetch error" do
       error = {:error, "fetch fail"}
 
-      stub(FetcherMock, :fetch_page, fn _ -> error end)
+      expect(FetcherMock, :fetch_page, fn _ -> error end)
 
       assert ^error = Scraper.scrape(%URI{})
     end
 
-    test "should return either on parse error" do
+    test "should return parser's error" do
       error = {:error, "parse fail"}
 
-      stub(FetcherMock, :fetch_page, fn _ -> {:ok, ""} end)
-      stub(ParserMock, :extract_wiki_urls, fn _, _ -> error end)
+      expect(FetcherMock, :fetch_page, fn _ -> {:ok, ""} end)
+      expect(ParserMock, :extract_wiki_urls, fn _, _ -> error end)
 
       assert ^error = Scraper.scrape(%URI{})
     end
