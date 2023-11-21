@@ -48,7 +48,7 @@ defmodule OhMyAdolf.Repo do
     end
   end
 
-  def register_relation(
+  def chain_nodes(
         conn \\ Neo.conn(),
         %Node{} = n1,
         %Node{} = n2,
@@ -109,7 +109,6 @@ defmodule OhMyAdolf.Repo do
   defp serialize_value(v) do
     "'#{v}'"
   end
-
 
   defp serialize_labels([]), do: ""
 
