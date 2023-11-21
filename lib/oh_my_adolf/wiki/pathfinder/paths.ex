@@ -32,7 +32,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
 
   defp do_register_path_nodes(conn, [node | nodes]) do
     Enum.reduce(nodes, node, fn sub, above ->
-      @repo.register_relation(conn, above, sub, @page_rel)
+      @repo.chain_nodes(conn, above, sub, @page_rel)
       sub
     end)
   end

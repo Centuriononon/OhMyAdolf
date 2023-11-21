@@ -5,15 +5,15 @@ defmodule OhMyAdolf.ThrottleTest do
   describe "Throttle ask/2" do
     setup :default_setup
 
-    test "should return :act before the rate is exceeded", params do
-      %{rate: rate, pid: pid} = params
+    test "should return :act before the rate is exceeded", context do
+      %{rate: rate, pid: pid} = context
 
       tips = Enum.map(1..rate, fn _ -> Throttle.ask(pid) end)
       assert Enum.all?(tips, &(&1 === :act))
     end
 
-    test "should return :await after the rate is exceeded", params do
-      %{rate: rate, pid: pid} = params
+    test "should return :await after the rate is exceeded", context do
+      %{rate: rate, pid: pid} = context
       exceed = 12
 
       tips = Enum.map(1..(rate + exceed), fn _ -> Throttle.ask(pid) end)
@@ -25,8 +25,8 @@ defmodule OhMyAdolf.ThrottleTest do
       assert Enum.all?(awaits, &(&1 === :await))
     end
 
-    test "should restart count 1 second after the last ask", params do
-      %{rate: rate, pid: pid} = params
+    test "should restart count 1 second after the last ask", context do
+      %{rate: rate, pid: pid} = context
 
       assert Enum.all?(1..rate, fn _ -> Throttle.ask(pid) === :act end)
 
