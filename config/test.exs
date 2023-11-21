@@ -33,3 +33,6 @@ config :ex_unit, :print_failures, true
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Logger is disabled during tests
+config :logger, backends: []

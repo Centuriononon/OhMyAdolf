@@ -30,14 +30,11 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
 
   defp register_path_nodes(conn, [node | nodes]) do
     Enum.reduce(nodes, node, fn sub, above ->
-      Logger.info(
-        "Chaining: #{node_to_url(above)} " <>
-          "--> #{node_to_url(sub)}"
-      )
-
       :ok = @repo.chain_nodes(conn, above, sub, @page_rel)
       sub
     end)
+
+    :ok
   end
 
   def registered_url?(conn \\ Neo.conn(), %URI{} = url) do
@@ -50,11 +47,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
     inter_node = List.last(heading_nodes)
 
     @repo.transaction(fn conn ->
-      Logger.debug("Opened transaction to get path by repo extension")
-
       if @repo.node_exists?(conn, inter_node) do
-        Logger.debug("Found the current url registered in the repo")
-
         case @repo.get_path(conn, inter_node, core_node, @page_rel) do
           {:ok, [_inter_node | tailing_nodes]} ->
             path_nodes = Enum.concat(heading_nodes, tailing_nodes)
@@ -66,7 +59,6 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
             {:error, :not_found}
         end
       else
-        Logger.error("Not found the current url during transaction")
         {:error, :not_found}
       end
     end)
