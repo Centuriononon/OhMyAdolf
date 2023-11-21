@@ -14,15 +14,12 @@ defmodule OhMyAdolf.Repo do
         relationship
       )
       when is_bitstring(relationship) do
-    n1_ls = serialize_labels(n2)
-    n1_ps = serialize_properties(n1)
-
-    n2_ls = serialize_labels(n2)
-    n2_ps = serialize_properties(n2)
+    n1_ser = serialize_node("start", n1)
+    n2_ser = serialize_node("end", n2)
 
     conn
     |> Neo.query("""
-      MATCH path = (s:#{n1_ls} #{n1_ps})-[:#{relationship}*]-(e:#{n2_ls} #{n2_ps})
+      MATCH path = #{n1_ser}-[:#{relationship}*]->#{n2_ser}
       RETURN path
       LIMIT 1;
     """)
@@ -39,17 +36,15 @@ defmodule OhMyAdolf.Repo do
   end
 
   def node_exists?(conn \\ Neo.conn(), %Node{} = n) do
-    ls = serialize_labels(n)
-    ps = serialize_properties(n)
+    n_ser = serialize_node("node", n)
 
     conn
     |> Neo.query("""
-      MATCH (x:#{ls} #{ps})
-      RETURN COUNT(x) > 0 AS exists
+      MATCH #{n_ser}
+      RETURN COUNT(node) > 0 AS exists
     """)
     |> case do
-      {:ok, resp} -> {:ok, List.first(resp.results)["exists"]}
-      {:error, %Neo.Error{message: msg}} -> {:error, msg}
+      {:ok, resp} -> List.first(resp.results)["exists"]
     end
   end
 
@@ -60,17 +55,14 @@ defmodule OhMyAdolf.Repo do
         relationship
       )
       when is_bitstring(relationship) do
-    n1_ls = serialize_labels(n2)
-    n1_ps = serialize_properties(n1)
-
-    n2_ls = serialize_labels(n2)
-    n2_ps = serialize_properties(n2)
+    n1_ser = serialize_node("abv", n1)
+    n2_ser = serialize_node("sub", n2)
 
     conn
     |> Neo.query("""
-    MERGE (a:#{n1_ls} #{n1_ps})
-    MERGE (b:#{n2_ls} #{n2_ps})
-    MERGE (a)-[:#{relationship}]->(b);
+    MERGE #{n1_ser}
+    MERGE #{n2_ser}
+    MERGE (abv)-[:#{relationship}]->(sub);
     """)
     |> case do
       {:ok, _} -> :ok
@@ -87,16 +79,41 @@ defmodule OhMyAdolf.Repo do
     end)
   end
 
-  defp serialize_properties(%Node{} = n) do
-    ps =
-      n.properties
-      |> Enum.map(fn {k, v} -> "#{k}: '#{v}'" end)
-      |> Enum.join(",")
+  defp serialize_node(name, %Node{} = node) do
+    labels = serialize_labels(node.labels || [])
+    properties = serialize_properties(node.properties || %{})
 
-    "{#{ps}}"
+    "(#{name}#{labels}#{properties})"
   end
 
-  defp serialize_labels(%Node{} = n) do
-    Enum.join(n.labels, ":")
+  defp serialize_properties(%{} = properties)
+       when map_size(properties) > 0 do
+    ps =
+      properties
+      |> Enum.map(fn
+        {k, v} -> "#{k}: #{serialize_value(v)}"
+      end)
+      |> Enum.join(",")
+
+    " {#{ps}}"
+  end
+
+  defp serialize_properties(%{}) do
+    ""
+  end
+
+  defp serialize_value(v) when is_number(v) or is_boolean(v) do
+    "#{v}"
+  end
+
+  defp serialize_value(v) do
+    "'#{v}'"
+  end
+
+
+  defp serialize_labels([]), do: ""
+
+  defp serialize_labels(labels) when is_list(labels) do
+    ":" <> Enum.join(labels, ":")
   end
 end
