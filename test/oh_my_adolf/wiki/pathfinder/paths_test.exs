@@ -1,12 +1,11 @@
 defmodule OhMyAdolf.Wiki.Pathfinder.PathsTest do
   use ExUnit.Case, async: true
   import Mox
+  import OhMyAdolf.Test.Support.WikiPathHelpers
 
   alias OhMyAdolf.Wiki.Pathfinder.Paths
   alias OhMyAdolf.RepoMock
-  alias Bolt.Sips.Types.Node
 
-  @page_label "Page"
   @page_rel "REFERS_TO"
 
   describe "Wiki.Pathfinder.Paths get_path/2" do
@@ -265,26 +264,5 @@ defmodule OhMyAdolf.Wiki.Pathfinder.PathsTest do
 
       assert {:ok, ^final_path} = Paths.extend_path(heading_urls, core_url)
     end
-  end
-
-  defp gen_urls(from \\ 1, n) do
-    for i <- from..(from + n) do
-      URI.parse("http://host/#{i}")
-    end
-  end
-
-  defp gen_nodes(from \\ 1, n) do
-    Enum.map(gen_urls(from, n), &get_node/1)
-  end
-
-  defp get_node(%URI{} = url) do
-    url |> to_string() |> Base.encode64() |> get_node()
-  end
-
-  defp get_node(url_hash) do
-    %Node{
-      labels: [@page_label],
-      properties: %{"url_hash" => url_hash}
-    }
   end
 end
