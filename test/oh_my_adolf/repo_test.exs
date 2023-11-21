@@ -299,4 +299,132 @@ defmodule OhMyAdolf.RepoTest do
       )
     end
   end
+
+  describe "Repo chain_nodes/4" do
+    test "should register relation between existing nodes", context do
+      %{conn: conn} = context
+
+      Neo.transaction(
+        conn,
+        fn conn ->
+          Neo.query(conn, """
+          CREATE (a:A {a: "maximum", d: true})
+          CREATE (b:B:C {a: "no"})
+          """)
+
+          :ok =
+            Repo.chain_nodes(
+              conn,
+              %Node{labels: ["A"], properties: %{"a" => "m", "d" => true}},
+              %Node{labels: ["B", "C"], properties: %{"a" => "no"}},
+              "RELATES"
+            )
+
+          resp =
+            Neo.query!(conn, """
+            MATCH (a:A)-[r:RELATES]->(b:B)
+            RETURN a, b, r
+            """)
+
+          assert %Bolt.Sips.Response{
+                   records: [
+                     [
+                       %Bolt.Sips.Types.Node{properties: %{}, labels: ["A"]},
+                       %Bolt.Sips.Types.Node{
+                         properties: %{},
+                         labels: ["B", "C"]
+                       },
+                       %Bolt.Sips.Types.Relationship{
+                         properties: %{},
+                         type: "RELATES"
+                       }
+                     ]
+                   ]
+                 } = resp
+
+          Neo.rollback(conn, :end)
+        end
+      )
+    end
+
+    test "should register new nodes and their relationship", context do
+      %{conn: conn} = context
+
+      Neo.transaction(
+        conn,
+        fn conn ->
+          :ok =
+            Repo.chain_nodes(
+              conn,
+              %Node{labels: ["A"]},
+              %Node{labels: ["B"]},
+              "RELATES"
+            )
+
+          resp =
+            Neo.query!(conn, """
+            MATCH (a:A)-[r:RELATES]->(b:B)
+            RETURN a, b, r
+            """)
+
+          assert %Bolt.Sips.Response{
+                   records: [
+                     [
+                       %Bolt.Sips.Types.Node{properties: %{}, labels: ["A"]},
+                       %Bolt.Sips.Types.Node{properties: %{}, labels: ["B"]},
+                       %Bolt.Sips.Types.Relationship{
+                         properties: %{},
+                         type: "RELATES"
+                       }
+                     ]
+                   ]
+                 } = resp
+
+          Neo.rollback(conn, :end)
+        end
+      )
+    end
+
+    test "should relate new node to existing one", context do
+      %{conn: conn} = context
+
+      Neo.transaction(
+        conn,
+        fn conn ->
+          Neo.query(conn, """
+          CREATE (b:B)
+          """)
+
+          :ok =
+            Repo.chain_nodes(
+              conn,
+              %Node{labels: ["A"]},
+              %Node{labels: ["B"]},
+              "RELATES"
+            )
+
+          resp =
+            Neo.query!(conn, """
+            MATCH (a:A)-[r:RELATES]->(b:B)
+            RETURN a, b, r
+            """)
+
+          assert %Bolt.Sips.Response{
+                   records: [
+                     [
+                       %Bolt.Sips.Types.Node{properties: %{}, labels: ["A"]},
+                       %Bolt.Sips.Types.Node{properties: %{}, labels: ["B"]},
+                       %Bolt.Sips.Types.Relationship{
+                         properties: %{},
+                         type: "RELATES"
+                       }
+                     ]
+                   ]
+                 } = resp
+
+          Neo.rollback(conn, :end)
+        end
+      )
+    end
+  end
 end
