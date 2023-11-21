@@ -15,6 +15,7 @@ config :oh_my_adolf, :wiki,
   parser: OhMyAdolf.Wiki.ParserMock,
   fetcher: OhMyAdolf.Wiki.FetcherMock,
   scraper: OhMyAdolf.Wiki.ScraperMock,
+  repo: OhMyAdolf.RepoMock,
   scraping_timeout: 1000,
   scraping_chunks: 10,
   http_options: [follow_redirect: true],
@@ -28,7 +29,7 @@ config :bolt_sips, Bolt,
   ]
 
 # Print only warnings and errors during test
-config :logger, level: :warning
+config :ex_unit, :print_failures, true
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime

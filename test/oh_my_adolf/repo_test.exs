@@ -3,7 +3,7 @@ defmodule OhMyAdolf.RepoTest do
 
   alias OhMyAdolf.Repo
   alias Bolt.Sips, as: Neo
-  alias Bolt.Sips.Types.{Node}
+  alias Bolt.Sips.Types.Node
 
   setup_all do
     conn = Neo.conn()

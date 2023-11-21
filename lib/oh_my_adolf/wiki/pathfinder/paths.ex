@@ -14,25 +14,28 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
     n1 = url_to_node(start_url)
     n2 = url_to_node(end_url)
 
-    IO.puts "get path request with: #{start_url} and #{end_url}"
-
     with {:ok, path_nodes} <- @repo.get_path(n1, n2, @page_rel) do
       {:ok, nodes_to_urls(path_nodes)}
     end
   end
 
-  def register_path([_ | _] = path) do
+  def register_path(path) when length(path) >= 2 do
     path_nodes = urls_to_nodes(path)
 
-    @repo.transaction(&do_register_path_nodes(&1, path_nodes))
+    @repo.transaction(&register_path_nodes(&1, path_nodes))
     |> case do
       {:ok, _reply} -> :ok
     end
   end
 
-  defp do_register_path_nodes(conn, [node | nodes]) do
+  defp register_path_nodes(conn, [node | nodes]) do
     Enum.reduce(nodes, node, fn sub, above ->
-      @repo.chain_nodes(conn, above, sub, @page_rel)
+      Logger.info(
+        "Chaining: #{node_to_url(above)} " <>
+          "--> #{node_to_url(sub)}"
+      )
+
+      :ok = @repo.chain_nodes(conn, above, sub, @page_rel)
       sub
     end)
   end
@@ -55,7 +58,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
         case @repo.get_path(conn, inter_node, core_node, @page_rel) do
           {:ok, [_inter_node | tailing_nodes]} ->
             path_nodes = Enum.concat(heading_nodes, tailing_nodes)
-            do_register_path_nodes(conn, path_nodes)
+            register_path_nodes(conn, path_nodes)
 
             {:ok, path_nodes}
 
