@@ -7,8 +7,6 @@ defmodule OhMyAdolf.Application do
 
   @impl true
   def start(_type, _args) do
-    IO.puts inspect Application.get_env(:bolt_sips, Bolt)
-
     children = [
       # Neo4j driver
       {Bolt.Sips, Application.get_env(:bolt_sips, Bolt)},

@@ -1,6 +1,6 @@
-build:
-	- docker-compose build
-down:
+start:
+	- docker-compose up --build
+stop:
 	- docker-compose down
 neo4j:
 	- docker-compose up -d neo4j
