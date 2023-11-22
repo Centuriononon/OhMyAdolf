@@ -1,8 +1,8 @@
 # OhMyAdolf 🦃
 The project is inspired by the [Wiki-Game](https://en.wikipedia.org/wiki/Wikipedia:Wiki_Game). Users input a Wikipedia URL and, after a brief wait, receive a path from the current URL to a specified destination (we're looking for adolphs here*). 
 
+![Video demo](./demo.gif)
 - Please be aware, that it's all in good humor.
-
 ----
 
 ### Formatting.
