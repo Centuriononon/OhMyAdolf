@@ -26,12 +26,12 @@ The application is built on __Elixir__, __Phoenix LiveView__, and __Neo4j__ for 
     - Copy and paste everything from the `.example.env` into `.env`.
 3. Run:
 ```
-make start
+make up
 ```
 
-- Don't forget halt the project with:
+- Stop the application when you leave:
 ```
-make stop
+make down
 ``` 
 
 ---
@@ -39,5 +39,5 @@ make stop
 ### Tests.
 - I didn't cover everything with tests, but only what was crucial. You can run tests inside a docker container using the following command:
 ```
-make unit-tests
+make up/test
 ```
