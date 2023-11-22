@@ -20,6 +20,8 @@ if System.get_env("PHX_SERVER") do
   config :oh_my_adolf, OhMyAdolfWeb.Endpoint, server: true
 end
 
+IO.puts "Configuring in #{config_env()} mode"
+
 if config_env() == :prod do
   db_url =
     System.get_env("NEO4J_BOLT_URL") ||

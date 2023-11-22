@@ -38,4 +38,4 @@ config :ex_unit, :print_failures, true
 config :phoenix, :plug_init_mode, :runtime
 
 # Logger is disabled during tests
-# config :logger, backends: []
+config :logger, backends: []

@@ -7,6 +7,7 @@
 # General application configuration
 import Config
 
+
 config :oh_my_adolf,
   wiki: [
     core_url: "https://en.wikipedia.org/wiki/Adolf_Hitler",

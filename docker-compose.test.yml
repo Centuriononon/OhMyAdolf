@@ -3,10 +3,12 @@ version: "3.8"
 services:
   server:
     container_name: oma-test
-    network_mode: host
     build: 
       context: .
       dockerfile: Dockerfile.test
+    network_mode: host
+    environment:
+      NEO4J_HTTP_URL: "http://localhost:7475"
 
   neo4j:
     container_name: oma__neo4j-test
