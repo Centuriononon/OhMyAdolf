@@ -11,8 +11,9 @@ services:
       HTTP_PORT: "${HTTP_PORT}" 
       NEO4J_USERNAME: "${NEO4J_USERNAME}"
       NEO4J_PASSWORD: "${NEO4J_PASSWORD}"
-      NEO4J_URL: "bolt://localhost:7687"
-      SECRET_KEY_BASE: "no secrets"
+      NEO4J_BOLT_URL: "bolt://localhost:7687"
+      NEO4J_HTTP_URL: "http://localhost:7474"
+      SECRET_KEY_BASE:  "${SECRET_KEY_BASE}"
     network_mode: host
     restart: on-failure
     depends_on:

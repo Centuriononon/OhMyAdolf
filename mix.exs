@@ -61,7 +61,7 @@ defmodule OhMyAdolf.MixProject do
       setup: ["deps.get", "assets.setup", "assets.build"],
       "assets.setup": ["esbuild.install --if-missing"],
       "assets.build": ["esbuild default"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["esbuild --no-runtime-config default --minify", "phx.digest"]
     ]
   end
 end
