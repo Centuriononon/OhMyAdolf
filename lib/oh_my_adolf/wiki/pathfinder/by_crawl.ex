@@ -26,9 +26,6 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
       {:found, path} ->
         {:ok, path}
 
-      {:error, exception} ->
-        {:error, exception}
-
       {%Graph{}, %URI{}, %URI{}} ->
         exc =
           NotFoundPathError.exception(
