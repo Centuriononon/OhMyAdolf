@@ -1,13 +1,9 @@
-defmodule OhMyAdolf.Test.Support.WikiPathHelpers do
+defmodule OhMyAdolf.Test.Support.Wiki.PathHelpers do
+  import OhMyAdolf.Test.Support.Wiki.Helpers
+
   alias Bolt.Sips.Types.Node
 
   @page_label "Page"
-
-  def gen_urls(from \\ 1, n) do
-    for i <- from..(from + n) do
-      URI.parse("http://host/#{i}")
-    end
-  end
 
   def gen_nodes(from \\ 1, n) do
     Enum.map(gen_urls(from, n), &get_node/1)

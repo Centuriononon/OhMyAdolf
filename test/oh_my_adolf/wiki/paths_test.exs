@@ -1,14 +1,14 @@
-defmodule OhMyAdolf.Wiki.Pathfinder.PathsTest do
+defmodule OhMyAdolf.Wiki.PathsTest do
   use ExUnit.Case, async: true
   import Mox
-  import OhMyAdolf.Test.Support.WikiPathHelpers
+  import OhMyAdolf.Test.Support.Wiki.{Helpers, PathHelpers}
 
-  alias OhMyAdolf.Wiki.Pathfinder.Paths
+  alias OhMyAdolf.Wiki.Paths
   alias OhMyAdolf.RepoMock
 
   @page_rel "REFERS_TO"
 
-  describe "Wiki.Pathfinder.Paths get_path/2" do
+  describe "Wiki.Paths get_path/2" do
     test "should transform urls to nodes" do
       page_rel = @page_rel
 
@@ -47,7 +47,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.PathsTest do
     end
   end
 
-  describe "Wiki.Pathfinder.Paths register_path/1" do
+  describe "Wiki.Paths register_path/1" do
     test "should chain within transaction" do
       page_rel = @page_rel
 
@@ -97,7 +97,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.PathsTest do
     end
   end
 
-  describe "Wiki.Pathfinder.Paths registered_url?/2" do
+  describe "Wiki.Paths registered_url?/2" do
     test "should transform url to node" do
       url = URI.parse("http://host/path")
       node = get_node(url)
@@ -130,7 +130,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.PathsTest do
     end
   end
 
-  describe "Wiki.Pathfinder.Paths extend_path/2" do
+  describe "Wiki.Paths extend_path/2" do
     test "should extend within transaction (no inter node case)" do
       expect(
         RepoMock,

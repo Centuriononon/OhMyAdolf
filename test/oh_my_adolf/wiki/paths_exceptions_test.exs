@@ -1,27 +1,25 @@
-defmodule OhMyAdolf.Wiki.Pathfinder.PathsExceptionsTest do
+defmodule OhMyAdolf.Wiki.PathsExceptionsTest do
   use ExUnit.Case, async: true
   import Mox
-  import OhMyAdolf.Test.Support.WikiPathHelpers
+  import OhMyAdolf.Test.Support.Wiki.{PathHelpers, Helpers}
 
   alias OhMyAdolf.RepoMock
-  alias OhMyAdolf.Wiki.Pathfinder.Paths
+  alias OhMyAdolf.Wiki.Paths
 
-  describe "Wiki.Pathfinder.Paths get_path/2" do
-    test "should except repo's errors" do
-      reason = :no_reason
-
+  describe "Wiki.Paths get_path/2" do
+    test "should transform repo's errors" do
       url_head = URI.parse("https://host/head")
       url_tail = URI.parse("https://host/tail")
 
       stub(RepoMock, :get_path, fn _conn, _h_n, _t_n ->
-        {:error, reason}
+        {:error, "some_reason"}
       end)
 
-      assert {:error, ^reason} = Paths.get_path(url_head, url_tail)
+      assert {:error, :not_found} = Paths.get_path(url_head, url_tail)
     end
   end
 
-  describe "Wiki.Pathfinder.Paths extend_path/2" do
+  describe "Wiki.Paths extend_path/2" do
     test "should except no inter node case" do
       stub(RepoMock, :transaction, fn fun ->
         {:ok, fun.(:db_conn)}
