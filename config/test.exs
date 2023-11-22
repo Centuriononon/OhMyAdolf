@@ -15,6 +15,8 @@ config :oh_my_adolf, :wiki,
   parser: OhMyAdolf.Wiki.ParserMock,
   fetcher: OhMyAdolf.Wiki.FetcherMock,
   scraper: OhMyAdolf.Wiki.ScraperMock,
+  paths: OhMyAdolf.Wiki.PathsMock,
+  crawler: OhMyAdolf.Wiki.CrawlerMock,
   repo: OhMyAdolf.RepoMock,
   scraping_timeout: 1000,
   scraping_chunks: 10,
@@ -35,4 +37,4 @@ config :ex_unit, :print_failures, true
 config :phoenix, :plug_init_mode, :runtime
 
 # Logger is disabled during tests
-config :logger, backends: []
+# config :logger, backends: []

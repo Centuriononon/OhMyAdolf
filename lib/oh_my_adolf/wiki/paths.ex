@@ -1,4 +1,4 @@
-defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
+defmodule OhMyAdolf.Wiki.Paths do
   @moduledoc """
   This is a model over Bolt.Sips for executing queries over the Wiki based interface.
   """
@@ -16,6 +16,9 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Paths do
 
     with {:ok, path_nodes} <- @repo.get_path(n1, n2, @page_rel) do
       {:ok, nodes_to_urls(path_nodes)}
+    else
+      {:error, _not_found} ->
+        {:error, :not_found}
     end
   end
 

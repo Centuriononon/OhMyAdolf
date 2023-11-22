@@ -16,7 +16,7 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
   @paths Application.compile_env(
            :oh_my_adolf,
            [:wiki, :paths],
-           OhMyAdolf.Wiki.Pathfinder.Paths
+           OhMyAdolf.Wiki.Paths
          )
 
   def find_path(start_url, core_url) do
@@ -53,10 +53,9 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
     graph = Helpers.add_relation_to_graph(graph, abv_url, sub_url)
 
     if @wiki_url.canonical?(sub_url, core_url) do
-      Logger.debug("Found the path by reaching the core url")
+      path = get_path(graph, start_url, sub_url)
+      :ok = @paths.register_path(path)
 
-      path = Helpers.get_path_from_graph(graph, start_url, core_url)
-      {:ok, _resp} = @paths.register_path(path)
       {:halt, {:found, path}}
     else
       try_extend_path(graph, sub_url, start_url, core_url)
@@ -64,22 +63,23 @@ defmodule OhMyAdolf.Wiki.Pathfinder.ByCrawl do
   end
 
   defp try_extend_path(graph, sub_url, start_url, core_url) do
-    if @paths.registered_url?(sub_url) do
-      path =
-        Task.async(fn ->
-          Helpers.get_path_from_graph(graph, start_url, sub_url)
-        end)
-        |> Task.await(10_000)
-
-      @paths.extend_path(path, core_url)
-      |> case do
-        {:ok, path} ->
-          Logger.debug("Found the path by repo extention")
-          {:halt, {:found, path}}
-
-        {:error, _not_found} ->
-          {:cont, {graph, start_url, core_url}}
-      end
+    with(
+      true <- @paths.registered_url?(sub_url),
+      path <- get_path(graph, start_url, sub_url),
+      {:ok, final_path} <- @paths.extend_path(path, core_url)
+    ) do
+      Logger.debug("Found the path by repo extention")
+      {:halt, {:found, final_path}}
+    else
+      _ ->
+        {:cont, {graph, start_url, core_url}}
     end
+  end
+
+  defp get_path(graph, start_url, sub_url) do
+    Task.async(fn ->
+      Helpers.find_path_from_graph(graph, start_url, sub_url)
+    end)
+    |> Task.await(10_000)
   end
 end

@@ -1,6 +1,6 @@
 defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
   def add_relation_to_graph(
-        graph,
+        %Graph{} = graph,
         %URI{} = abv_url,
         %URI{} = sub_url
       ) do
@@ -13,8 +13,8 @@ defmodule OhMyAdolf.Wiki.Pathfinder.Helpers do
     |> Graph.add_edge(abv_ref, sub_ref)
   end
 
-  def get_path_from_graph(
-        graph,
+  def find_path_from_graph(
+        %Graph{} = graph,
         %URI{} = start_url,
         %URI{} = end_url
       ) do
