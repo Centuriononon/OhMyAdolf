@@ -44,7 +44,7 @@ COPY lib lib
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
-# Compile the release
+# Compile the project
 RUN mix compile
 
 COPY test test
